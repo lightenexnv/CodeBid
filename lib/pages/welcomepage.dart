@@ -1,6 +1,7 @@
 import 'package:codebid/pages/auth_pages/loginpage.dart';
 import 'package:codebid/pages/auth_pages/signuppage.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class Welcomepage extends StatelessWidget {
   const Welcomepage({super.key});
@@ -47,7 +48,7 @@ class Welcomepage extends StatelessWidget {
                   InkWell(
                     onTap: (){
 
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>Signuppage() ));
+                      Get.to(() => Signuppage());
                     },
                     child: Container(
                       height: height*0.07,
@@ -74,7 +75,7 @@ class Welcomepage extends StatelessWidget {
                   SizedBox(height: height*0.01,),
                   InkWell(
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=> Loginpage()));
+                      Get.to(() => Loginpage());
                     },
                     child: Container(
                       height: height*0.07,

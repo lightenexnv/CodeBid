@@ -1,27 +1,44 @@
+import 'package:codebid/controllers/auth_controller.dart';
+import 'package:codebid/controllers/auth_page_controller.dart';
 import 'package:codebid/pages/auth_pages/loginpage.dart';
+import 'package:codebid/pages/main_navigation.dart';
 import 'package:codebid/pages/rolepage.dart';
+import 'package:codebid/utils/snackbarPopup.dart';
 import 'package:flutter/material.dart';
 import 'package:codebid/widgets/gradientwidget.dart';
 import 'package:codebid/widgets/authtextfields.dart';
+import 'package:get/get.dart';
 
 class Signuppage extends StatelessWidget {
-  const Signuppage({super.key});
+  Signuppage({super.key});
+
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmController = TextEditingController();
+  final controller = AuthController();
+
+  final AuthScreenControllers authcontroller = Get.put(AuthScreenControllers());
+
+  void signup()async{
+    try{
+      final user = await controller.register(emailController.text.trim(), passwordController.text.trim());
+      if(user!=null){
+        Get.off(()=>MainNavigation());
+      }
+    } catch(e){
+      SnackbarUtils.show("SignUp Failed", "Check Credentials");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-    final confirmController = TextEditingController();
-
     final double height = MediaQuery.sizeOf(context).height;
     final double width = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
       body: Stack(
         children: [
-
-
           Column(
             children: [
               Hero(
@@ -36,7 +53,6 @@ class Signuppage extends StatelessWidget {
               ),
             ],
           ),
-
 
           Align(
             alignment: Alignment.center,
@@ -59,7 +75,6 @@ class Signuppage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
 
-
                   AuthTextField(
                     hint: "Full Name",
                     icon: Icons.person_outline,
@@ -67,7 +82,6 @@ class Signuppage extends StatelessWidget {
                   ),
 
                   SizedBox(height: height * 0.02),
-
 
                   AuthTextField(
                     hint: "Email",
@@ -77,28 +91,43 @@ class Signuppage extends StatelessWidget {
 
                   SizedBox(height: height * 0.02),
 
-
-                  AuthTextField(
+                  Obx(() => AuthTextField(
                     hint: "Password",
                     icon: Icons.lock_outline,
                     controller: passwordController,
-                  ),
+                    obscure: authcontroller.isObscure.value,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        authcontroller.isObscure.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: authcontroller.toggleObscure,
+                    ),
+                  )),
 
                   SizedBox(height: height * 0.02),
 
-
-                  AuthTextField(
+                  Obx(() => AuthTextField(
                     hint: "Confirm Password",
                     icon: Icons.lock_outline,
                     controller: confirmController,
-                  ),
+                    obscure: authcontroller.isObscure.value,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        authcontroller.isObscure.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: authcontroller.toggleObscure,
+                    ),
+                  )),
 
                   SizedBox(height: height * 0.03),
 
-
                   InkWell(
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=> Rolepage()));
+                      signup();
                     },
                     child: Hero(
                       tag: "hero-button",
@@ -115,7 +144,7 @@ class Signuppage extends StatelessWidget {
                               ],
                             ),
                           ),
-                          child: Center(
+                          child: const Center(
                             child: Text(
                               "Create Account",
                               style: TextStyle(
@@ -132,16 +161,15 @@ class Signuppage extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Already have an account? "),
+                      const Text("Already have an account? "),
                       InkWell(
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=> Loginpage()));
+                        onTap: () {
+                          Get.off(() => Loginpage());
                         },
-                        child: Text(
+                        child: const Text(
                           "Login",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,

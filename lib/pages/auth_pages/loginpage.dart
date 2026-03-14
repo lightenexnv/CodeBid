@@ -1,15 +1,38 @@
+import 'package:codebid/controllers/auth_controller.dart';
+import 'package:codebid/controllers/auth_page_controller.dart';
 import 'package:codebid/pages/auth_pages/signuppage.dart';
+import 'package:codebid/pages/main_navigation.dart';
+import 'package:codebid/utils/snackbarPopup.dart';
 import 'package:flutter/material.dart';
 import 'package:codebid/widgets/gradientwidget.dart';
 import 'package:codebid/widgets/authtextfields.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class Loginpage extends StatelessWidget {
-  const Loginpage({super.key});
+  Loginpage({super.key});
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final controller = AuthController();
+  final AuthScreenControllers authcontroller = Get.put(AuthScreenControllers());
+
+  void login()async{
+    try{
+      final user = await controller.login(emailController.text.trim(), passwordController.text.trim());
+
+      if(user!= null){
+        Get.off(()=>MainNavigation());
+      }
+    }catch(e){
+      SnackbarUtils.show("Login Failed", "Check email & password");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
+
 
     final double height = MediaQuery.sizeOf(context).height;
     final double width = MediaQuery.sizeOf(context).width;
@@ -66,34 +89,48 @@ class Loginpage extends StatelessWidget {
                   SizedBox(height: height * 0.02),
 
 
-                  AuthTextField(
+                  Obx(()=> AuthTextField(
                     hint: "Password",
                     icon: Icons.lock_outline,
                     controller: passwordController,
-                  ),
+                    obscure: authcontroller.isObscure.value,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        authcontroller.isObscure.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: authcontroller.toggleObscure,
+                    ),
+                  )),
 
                   SizedBox(height: height * 0.03),
 
 
-                  Container(
-                    height: height * 0.065,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF2DD4BF),
-                          Color(0xFF1FA2FF),
-                        ],
+                  InkWell(
+                    onTap: (){
+                      login();
+                    },
+                    child: Container(
+                      height: height * 0.065,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF2DD4BF),
+                            Color(0xFF1FA2FF),
+                          ],
+                        ),
                       ),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "Login",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                      child: const Center(
+                        child: Text(
+                          "Login",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
@@ -107,7 +144,7 @@ class Loginpage extends StatelessWidget {
                       const Text("Don't have an account? "),
                       InkWell(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=> Signuppage()));
+                          Get.off(()=> Signuppage());
                         },
                         child: const Text(
                           "Sign Up",

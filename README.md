@@ -1,3 +1,6 @@
+Total number of characters written in this full project: 40651
+Total number of lines written in this full project: 1252
+
 # codebid
 
 A new Flutter project.
