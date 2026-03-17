@@ -24,27 +24,50 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   final budgetTitleController = TextEditingController();
   final githubLinkController = TextEditingController();
 
-  File? imageFile;
+  List<File> imageFiles = [];
   final picker = ImagePicker();
 
-  Future imagePicker() async {
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
+  bool isLoading = false;
+
+  Future pickImages() async {
+    final picked = await picker.pickMultiImage();
+
+    if (picked.isNotEmpty) {
+      if (picked.length > 5) {
+        Get.snackbar("Limit", "Max 5 images allowed");
+        return;
+      }
+
       setState(() {
-        imageFile = File(picked.path);
+        imageFiles = picked.map((e) => File(e.path)).toList();
       });
     }
   }
 
-  Future<String> uploadImage(File imageFile) async {
-    final url = Uri.parse("https://api.cloudinary.com/v1_1/defl5v5uk/image/upload");
-    var request = http.MultipartRequest('POST', url);
-    request.fields["upload_preset"] = "CodeBid";
-    request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
-    var response = await request.send();
-    var res = await http.Response.fromStream(response);
-    final data = jsonDecode(res.body);
-    return data["secure_url"];
+  Future<List<String>> uploadImages(List<File> files) async {
+    List<String> urls = [];
+
+    for (var file in files) {
+      final url = Uri.parse(
+          "https://api.cloudinary.com/v1_1/defl5v5uk/image/upload");
+
+      var request = http.MultipartRequest('POST', url);
+
+      request.fields["upload_preset"] = "CodeBid";
+
+      request.files.add(
+        await http.MultipartFile.fromPath('file', file.path),
+      );
+
+      var response = await request.send();
+      var res = await http.Response.fromStream(response);
+
+      final data = jsonDecode(res.body);
+
+      urls.add(data["secure_url"]);
+    }
+
+    return urls;
   }
 
   Future createTask() async {
@@ -58,11 +81,15 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       return;
     }
 
-    String imageUrl = "";
+    setState(() {
+      isLoading = true;
+    });
+
+    List<String> imageUrls = [];
 
     try {
-      if (imageFile != null) {
-        imageUrl = await uploadImage(imageFile!);
+      if (imageFiles.isNotEmpty) {
+        imageUrls = await uploadImages(imageFiles);
       }
 
       final ref = FirebaseDatabase.instance
@@ -76,7 +103,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         "description": descTitleController.text,
         "budget": budgetTitleController.text,
         "github": githubLinkController.text,
-        "image": imageUrl,
+        "images": imageUrls,
         "createdBy": user!.uid,
         "highestBid": 0,
         "timestamp": ServerValue.timestamp
@@ -87,6 +114,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     } catch (e) {
       SnackbarUtils.show("Error Creating Task", e.toString());
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -126,8 +157,17 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   SizedBox(height: height * 0.02),
                   AuthTextField(
+
                     hint: "Budget",
-                    icon: Icons.attach_money,
+                    icon: Icons.currency_rupee,
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("in rupees"),
+                        ],
+                      ),
+                    ),
                     controller: budgetTitleController,
                   ),
                   SizedBox(height: height * 0.02),
@@ -138,15 +178,16 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   SizedBox(height: height * 0.02),
                   GestureDetector(
-                    onTap: imagePicker,
+                    onTap: pickImages,
                     child: Container(
                       width: double.infinity,
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF3F5F7),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: Colors.grey.shade300),
                       ),
-                      child: imageFile == null
+                      child: imageFiles.isEmpty
                           ? SizedBox(
                         height: 60,
                         child: Row(
@@ -154,23 +195,36 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                           children: const [
                             Icon(Icons.camera_alt_outlined),
                             SizedBox(width: 8),
-                            Text("Upload Screenshot"),
+                            Text("Upload Screenshots"),
                           ],
                         ),
                       )
-                          : ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.file(
-                          imageFile!,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
+                          : SizedBox(
+                        height: 90,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: imageFiles.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  imageFiles[index],
+                                  height: 80,
+                                  width: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
                   ),
                   SizedBox(height: height * 0.03),
                   GestureDetector(
-                    onTap: createTask,
+                    onTap: isLoading ? null : createTask,
                     child: Container(
                       height: 55,
                       width: double.infinity,
@@ -183,8 +237,12 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                         ),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Center(
-                        child: Text(
+                      child: Center(
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                            : const Text(
                           "Post Task",
                           style: TextStyle(
                             color: Colors.white,

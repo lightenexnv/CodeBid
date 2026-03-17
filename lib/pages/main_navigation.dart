@@ -65,7 +65,7 @@ class MainNavigation extends StatelessWidget {
                     child: const Icon(Icons.add, color: Colors.white),
                   ),
                 ),
-                _navItem(Icons.send_outlined, "Tasks", 3),
+                _navItem(Icons.send_outlined, "Bids", 3),
                 _navItem(Icons.person_outline, "Profile", 4),
               ],
             )),
