@@ -13,7 +13,12 @@
           "package_name": "com.example.campusconnect"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "144079572703-r6ken1v4pucm8tb40b52ci2v6fpc813r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBExrjaGXer5WZcVkKqKYctvOiWCL6M39w"
@@ -21,7 +26,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "144079572703-r6ken1v4pucm8tb40b52ci2v6fpc813r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "144079572703-6h8cjdvrce43fs0u399dqogsc3ve19ij.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.campusconnect"
+              }
+            }
+          ]
         }
       }
     },
@@ -32,7 +49,20 @@
           "package_name": "com.example.newsapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "144079572703-hie0ha375gn52k2guu1ghlb3ima3uj3u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.newsapp",
+            "certificate_hash": "4b11cb1ab4a982f3044e748c384326d5f725d3e7"
+          }
+        },
+        {
+          "client_id": "144079572703-r6ken1v4pucm8tb40b52ci2v6fpc813r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBExrjaGXer5WZcVkKqKYctvOiWCL6M39w"
@@ -40,7 +70,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "144079572703-r6ken1v4pucm8tb40b52ci2v6fpc813r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "144079572703-6h8cjdvrce43fs0u399dqogsc3ve19ij.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.campusconnect"
+              }
+            }
+          ]
         }
       }
     },
@@ -51,7 +93,20 @@
           "package_name": "com.lightenexnv.codebid"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "144079572703-rglkk2gje97kgfjtttjg1uajonp7g97n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lightenexnv.codebid",
+            "certificate_hash": "4b11cb1ab4a982f3044e748c384326d5f725d3e7"
+          }
+        },
+        {
+          "client_id": "144079572703-r6ken1v4pucm8tb40b52ci2v6fpc813r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBExrjaGXer5WZcVkKqKYctvOiWCL6M39w"
@@ -59,7 +114,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "144079572703-r6ken1v4pucm8tb40b52ci2v6fpc813r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "144079572703-6h8cjdvrce43fs0u399dqogsc3ve19ij.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.campusconnect"
+              }
+            }
+          ]
         }
       }
     },
@@ -70,7 +137,12 @@
           "package_name": "com.swastlink.swastlink"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "144079572703-r6ken1v4pucm8tb40b52ci2v6fpc813r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBExrjaGXer5WZcVkKqKYctvOiWCL6M39w"
@@ -78,7 +150,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "144079572703-r6ken1v4pucm8tb40b52ci2v6fpc813r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "144079572703-6h8cjdvrce43fs0u399dqogsc3ve19ij.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.campusconnect"
+              }
+            }
+          ]
         }
       }
     }

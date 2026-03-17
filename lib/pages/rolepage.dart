@@ -1,13 +1,33 @@
-import 'package:codebid/pages/homepage.dart';
 import 'package:codebid/pages/main_navigation.dart';
 import 'package:codebid/widgets/gradientwidget.dart';
 import 'package:codebid/widgets/rolepagerolebox.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Rolepage extends StatelessWidget {
-  const Rolepage({super.key});
+  Rolepage({super.key});
+
+
+  Future<void> saveRole (String role)async{
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if(user==null){
+      return null;
+    }
+    final ref = FirebaseDatabase.instance.ref("codebid_database").child("users").child(user.uid);
+    await ref.set({
+      "name":user.displayName,
+      "email":user.email,
+      "role":role,
+      "createdAt":DateTime.now().millisecondsSinceEpoch,
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +74,9 @@ class Rolepage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
 
-                  RoleBoxWidget(boxheight: 0.13, gradientstart: Color(0xFF1FA2FF), gradientend: Color(0xFF2DD4BF), displayicon: Icons.bug_report_sharp, titletext: "Requester", desctext: "Post Task", ontapfunction: (){
+                  RoleBoxWidget(boxheight: 0.13, gradientstart: Color(0xFF1FA2FF), gradientend: Color(0xFF2DD4BF), displayicon: Icons.bug_report_sharp, titletext: "Requester", desctext: "Post Task", ontapfunction: ()async{
+                    await saveRole("requester");
+
                     Get.to(()=> MainNavigation());
                   }),
 
@@ -62,7 +84,8 @@ class Rolepage extends StatelessWidget {
 
                   Hero(
                       tag: "hero-button",
-                      child: Material(child: RoleBoxWidget(boxheight: 0.13, gradientstart: Color(0xFF2DD4BF), gradientend: Color(0xFF1FA2FF), displayicon: Icons.smart_toy_rounded, titletext: "Solver", desctext: "Bids & Solve Tasks", ontapfunction: (){
+                      child: Material(child: RoleBoxWidget(boxheight: 0.13, gradientstart: Color(0xFF2DD4BF), gradientend: Color(0xFF1FA2FF), displayicon: Icons.smart_toy_rounded, titletext: "Solver", desctext: "Bids & Solve Tasks", ontapfunction: ()async{
+                        await saveRole("solver");
                         Get.to(()=> MainNavigation());
                       }))),
                   ]

@@ -5,6 +5,7 @@ import 'package:codebid/pages/auth_pages/loginpage.dart';
 import 'package:codebid/pages/welcomepage.dart';
 import 'package:codebid/utils/snackbarPopup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:codebid/widgets/profile_page_widgets/menu_item.dart';
 import 'package:codebid/widgets/profile_page_widgets/stat_item.dart';
@@ -13,6 +14,9 @@ import 'package:get/get_core/src/get_main.dart';
 
 class ProfilePage extends StatelessWidget {
   ProfilePage({super.key});
+
+
+
 
   final controller = AuthController();
   void logout() async {
@@ -26,6 +30,11 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
+    final DatabaseReference ref = FirebaseDatabase.instance
+        .ref("codebid_database")
+        .child("users")
+        .child(user!.uid);
     final double height = MediaQuery.sizeOf(context).height;
     final double width = MediaQuery.sizeOf(context).width;
 
@@ -62,14 +71,24 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  "Neil Verma",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                StreamBuilder<DatabaseEvent>(stream: ref.onValue,
+                    builder: (context, AsyncSnapshot<DatabaseEvent> snapshot){
+                  if(!snapshot.hasData||snapshot.data!.snapshot.value==null){
+                    return CircularProgressIndicator();
+                  }
+
+                  final data = Map<String, dynamic>.from(
+                      snapshot.data!.snapshot.value as Map
+                  );
+
+                  return Text(
+                      data["name"],
+                      style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      ));
+                    }),
                 const Text(
                   "@neil_v",
                   style: TextStyle(

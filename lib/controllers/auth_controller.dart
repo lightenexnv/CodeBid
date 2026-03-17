@@ -13,7 +13,14 @@ class AuthController{
   }
 
   Future<User?> logout()async{
-    return await _service.logout();
+    await _service.logout();
   }
 
+  Future<User?> signInWithGoogle() async{
+    return await _service.signInWithGoogle();
+  }
+
+  Future<User?> signInWithGithub() async{
+    return await _service.signInWithGithub();
+  }
 }
