@@ -1,5 +1,5 @@
 import 'package:codebid/controllers/nav_controller.dart';
-import 'package:codebid/pages/bidspage.dart';
+import 'package:codebid/pages/tasksbidspage.dart';
 import 'package:codebid/pages/homepage.dart';
 import 'package:codebid/pages/profilepage.dart';
 import 'package:codebid/pages/taskspage.dart';
@@ -7,6 +7,7 @@ import 'package:codebid/pages/createtaskpage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+
 
 class MainNavigation extends StatelessWidget {
   MainNavigation({super.key});

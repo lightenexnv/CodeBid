@@ -96,6 +96,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
           .ref("codebid_database")
           .child("tasks")
           .child(taskId);
+      final userref = FirebaseDatabase.instance.ref("codebid_database").
+    child("users").child("${user!.uid}").child("taskCreated").push();
 
       await ref.set({
         "taskId": taskId,
@@ -106,7 +108,21 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         "images": imageUrls,
         "createdBy": user!.uid,
         "highestBid": 0,
-        "timestamp": ServerValue.timestamp
+        "timestamp": ServerValue.timestamp,
+        "createdAt": DateTime.now().toString(),
+      });
+
+      await userref.set({
+        "taskId": taskId,
+        "title": taskTitleController.text,
+        "description": descTitleController.text,
+        "budget": budgetTitleController.text,
+        "github": githubLinkController.text,
+        "images": imageUrls,
+        "createdBy": user!.uid,
+        "highestBid": 0,
+        "timestamp": ServerValue.timestamp,
+        "createdAt": DateTime.now().toString(),
       });
 
       Get.snackbar("Success", "Task Posted Successfully");

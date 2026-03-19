@@ -82,7 +82,7 @@ class ProfilePage extends StatelessWidget {
                   );
 
                   return Text(
-                      data["name"],
+                      data["name"]?.toString() ?? "User",
                       style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,

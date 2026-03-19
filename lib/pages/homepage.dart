@@ -1,6 +1,7 @@
 
 import 'package:codebid/controllers/nav_controller.dart';
 import 'package:codebid/pages/taskoverviewpage.dart';
+import 'package:codebid/utils/timeUtil.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -130,68 +131,112 @@ class Homepage extends StatelessWidget {
                     itemBuilder: (context,index){
                       final task = Map<String,dynamic>.from(tasks[index]);
                       final images = task["images"] ?? [];
+                      final createdAt = task["createdAt"];
+
+                      int timestamp = 0;
+
+                      if (createdAt is int) {
+                        timestamp = createdAt;
+                      }
+                      else if (createdAt is String && createdAt.isNotEmpty) {
+                        try {
+                          final parsedDate = DateTime.parse(createdAt);
+                          timestamp = parsedDate.millisecondsSinceEpoch;
+                        } catch (e) {
+                          timestamp = 0;
+                        }
+                      }
+
+                      if (timestamp == 0) {
+                        return const Text("Invalid date");
+                      }
+
 
                       return GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           Get.to(TaskOverviewPage(task: task));
                         },
                         child: Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 14),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [BoxShadow(
-                              color: Colors.black.withValues(alpha: 1)
-                            )]
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 12,
+                              )
+                            ],
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+
                               if (images.isNotEmpty)
-                                Hero(
-                                  tag: "display-image",
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
-                                      images[0],
-                                      height: 150,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(20),
+                                  ),
+                                  child: Image.network(
+                                    images[0],
+                                    height: 160,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                              SizedBox(height: height * 0.01,),
 
-                              Text(
-                                task["title"] ?? "",
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              Padding(
+                                padding: const EdgeInsets.all(14),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+
+                                    Text(
+                                      task["title"]?.toString() ?? "",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+
+                                    const SizedBox(height: 10),
+
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "₹ ${task["budget"]}",
+                                          style: const TextStyle(
+                                            color: Color(0xFF1FA2FF),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          "${task["bids"] ?? 0} Bids",
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 6),
+
+
+                                     Text(
+                                      TimeUtils.getTimeAgo(timestamp),
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Text(
-                                task["description"] ?? "",
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-
-                              SizedBox(height: height * 0.01,),
-
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "₹ ${task["budget"]}",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1FA2FF),
-                                    ),
-                                  ),
-                                  const Icon(Icons.arrow_forward_ios, size: 14)
-                                ],
-                              )
                             ],
                           ),
                         ),

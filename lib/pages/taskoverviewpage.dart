@@ -1,4 +1,9 @@
+import 'package:codebid/pages/tasksbidspage.dart';
+import 'package:codebid/pages/placebidpage.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class TaskOverviewPage extends StatelessWidget {
   final Map task;
@@ -17,7 +22,6 @@ class TaskOverviewPage extends StatelessWidget {
       body: Stack(
         children: [
 
-          /// 🔹 FIXED GRADIENT BACKGROUND
           Container(
             height: height * 0.15,
             width: double.infinity,
@@ -37,12 +41,10 @@ class TaskOverviewPage extends StatelessWidget {
             ),
           ),
 
-          /// 🔹 CONTENT OVERLAY
           SafeArea(
             child: Column(
               children: [
 
-                /// 🔙 BACK BUTTON
                 Row(
                   children: [
                     IconButton(
@@ -66,7 +68,6 @@ class TaskOverviewPage extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                /// 🖼️ IMAGE FLOATING OVER GRADIENT
                 if (images.isNotEmpty)
                   Hero(
                     tag: "display-image",
@@ -95,7 +96,6 @@ class TaskOverviewPage extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                /// 📄 DETAILS SECTION
                 Expanded(
                   child: Container(
                     width: width,
@@ -104,7 +104,6 @@ class TaskOverviewPage extends StatelessWidget {
                       child: Column(
                         children: [
 
-                          /// 💰 BUDGET
                           Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
@@ -121,23 +120,49 @@ class TaskOverviewPage extends StatelessWidget {
                               mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text("Budget",
-                                    style: TextStyle(color: Colors.grey)),
-                                Text(
-                                  "₹ ${task["budget"]}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1FA2FF),
-                                    fontSize: 16,
-                                  ),
+                                Column(
+                                  children: [
+                                    StreamBuilder(stream: FirebaseDatabase.instance.ref("codebid_database").
+                                        child("tasks").child(task["taskId"]).onValue,
+                                        builder: (context, snapshot){
+                                      if(!snapshot.hasData || snapshot.data!.snapshot.value== null){
+                                        return const Text("0");
+                                      }
+                                      final data = Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+
+
+                                      return Text(
+                                        "₹ ${data["lowestBid"]}",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF1FA2FF),
+                                          fontSize: 40,
+                                        ),
+                                      )
+                                        ;}),
+                                    const Text("Lowest Bid",
+                                        style: TextStyle(color: Colors.grey)),
+                                  ],
                                 ),
+                                Row(children: [
+                                  const Text("Budget",
+                                      style: TextStyle(color: Colors.grey)),
+                                  SizedBox(width: 10,),
+                                  Text(
+                                    "₹ ${task["budget"]}",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1FA2FF),
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],)
                               ],
                             ),
                           ),
 
                           const SizedBox(height: 16),
 
-                          /// 📝 DESCRIPTION
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(14),
@@ -171,7 +196,6 @@ class TaskOverviewPage extends StatelessWidget {
 
                           const SizedBox(height: 16),
 
-                          /// 🔗 GITHUB
                           if (task["github"] != null &&
                               task["github"].toString().isNotEmpty)
                             Container(
@@ -206,11 +230,12 @@ class TaskOverviewPage extends StatelessWidget {
 
                           const SizedBox(height: 25),
 
-                          /// 🔥 BID BUTTON
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Get.to(PlaceBidPage(task: task,));
+                              },
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                 backgroundColor: const Color(0xFF1FA2FF),
@@ -220,7 +245,8 @@ class TaskOverviewPage extends StatelessWidget {
                               ),
                               child: const Text(
                                 "Place a Bid",
-                                style: TextStyle(fontSize: 16),
+                                style: TextStyle(fontSize: 16,
+                                color: Colors.white),
                               ),
                             ),
                           ),

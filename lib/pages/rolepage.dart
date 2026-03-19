@@ -12,21 +12,19 @@ class Rolepage extends StatelessWidget {
   Rolepage({super.key});
 
 
-  Future<void> saveRole (String role)async{
-
+  Future<void> saveRole(String role) async {
     final user = FirebaseAuth.instance.currentUser;
 
-    if(user==null){
-      return null;
-    }
-    final ref = FirebaseDatabase.instance.ref("codebid_database").child("users").child(user.uid);
-    await ref.set({
-      "name":user.displayName,
-      "email":user.email,
-      "role":role,
-      "createdAt":DateTime.now().millisecondsSinceEpoch,
-    });
+    if (user == null) return;
 
+    final ref = FirebaseDatabase.instance
+        .ref("codebid_database")
+        .child("users")
+        .child(user.uid);
+
+    await ref.update({
+      "role": role,
+    });
   }
 
   @override

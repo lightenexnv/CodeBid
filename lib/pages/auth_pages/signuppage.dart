@@ -48,6 +48,19 @@ class Signuppage extends StatelessWidget {
   }
 
   void signup() async {
+    if (nameController.text.trim().isEmpty ||
+        emailController.text.trim().isEmpty ||
+        passwordController.text.trim().isEmpty ||
+        confirmController.text.trim().isEmpty) {
+      Get.snackbar("Error", "Fill all fields");
+      return;
+    }
+
+    if (passwordController.text != confirmController.text) {
+      Get.snackbar("Error", "Passwords do not match");
+      return;
+    }
+
     try {
       final user = await controller.register(
         emailController.text.trim(),
@@ -55,30 +68,97 @@ class Signuppage extends StatelessWidget {
       );
 
       if (user != null) {
+        await user.updateDisplayName(nameController.text.trim());
+
+        final userRef = FirebaseDatabase.instance
+            .ref("codebid_database")
+            .child("users")
+            .child(user.uid);
+
+        await userRef.set({
+          "uid": user.uid,
+          "name": nameController.text.trim(),
+          "email": emailController.text.trim(),
+          "role": null,
+          "createdAt": ServerValue.timestamp,
+        });
+
         checkUserRole();
       }
     } catch (e) {
-      SnackbarUtils.show("SignUp Failed", "Check Credentials");
+      SnackbarUtils.show("SignUp Failed", e.toString());
     }
   }
 
   void signInWithGoogle() async {
-    final user = await controller.signInWithGoogle();
-    if (user != null) {
-      checkUserRole();
+    try {
+      final user = await controller.signInWithGoogle();
+
+      if (user != null) {
+        final userRef = FirebaseDatabase.instance
+            .ref("codebid_database")
+            .child("users")
+            .child(user.uid);
+
+        final snapshot = await userRef.get();
+
+        if (!snapshot.exists) {
+          await userRef.set({
+            "uid": user.uid,
+            "name": user.displayName ?? "User",
+            "email": user.email ?? "",
+            "role": null,
+            "createdAt": DateTime.now().toString(),
+          });
+        }
+
+        checkUserRole();
+      }
+    } catch (e) {
+      SnackbarUtils.show("Google Login Failed", e.toString());
     }
   }
 
   void signInWithGithub() async {
     try {
       final user = await controller.signInWithGithub();
+
       if (user != null) {
+        final userRef = FirebaseDatabase.instance
+            .ref("codebid_database")
+            .child("users")
+            .child(user.uid);
+
+        final snapshot = await userRef.get();
+
+        if (!snapshot.exists) {
+          await userRef.set({
+            "uid": user.uid,
+            "name": user.displayName ?? "User",
+            "email": user.email ?? "",
+            "role": null,
+            "createdAt": ServerValue.timestamp,
+          });
+        }
+
         checkUserRole();
       }
     } catch (e) {
-      SnackbarUtils.show("GitHub Login Failed", "Try again");
+      SnackbarUtils.show("GitHub Login Failed", e.toString());
     }
   }
+
+  Future userDetailsPush()async{
+    final user = FirebaseAuth.instance.currentUser;
+
+    final userDetailref = FirebaseDatabase.instance.
+    ref("codebid_database").
+    child("users").child("${user!.uid}");
+
+    await userDetailref.set({
+      "userfullname": user.displayName
+    });
+}
 
   @override
   Widget build(BuildContext context) {
