@@ -1,5 +1,8 @@
+import 'package:codebid/pages/createtaskpage.dart';
+import 'package:codebid/pages/tasks_all_bids_page.dart';
 import 'package:codebid/pages/tasksbidspage.dart';
 import 'package:codebid/pages/placebidpage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,6 +20,47 @@ class TaskOverviewPage extends StatelessWidget {
     final images = task["images"] ?? [];
 
     return Scaffold(
+      floatingActionButton: StreamBuilder(
+        stream: FirebaseDatabase.instance
+            .ref("codebid_database")
+            .child("tasks")
+            .child(task["taskId"])
+            .onValue,
+        builder: (context, snapshot) {
+
+          if (!snapshot.hasData ||
+              snapshot.data!.snapshot.value == null) {
+            return const SizedBox();
+          }
+
+          final data = Map<String, dynamic>.from(
+              snapshot.data!.snapshot.value as Map);
+
+          final isClosed = data["isClosed"] == true;
+          final currentUser = FirebaseAuth.instance.currentUser;
+
+          final isOwner = currentUser?.uid == task["createdBy"];
+
+          if (!isOwner || isClosed) {
+            return const SizedBox();
+          }
+
+          return FloatingActionButton.extended(
+            onPressed: () {
+              Get.to(CreateTaskPage(
+                isEdit: true,
+                task: task,
+              ));
+            },
+            backgroundColor: const Color(0xFF1FA2FF),
+            icon: const Icon(Icons.edit, color: Colors.white),
+            label: const Text(
+              "Edit Task",
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        },
+      ),
       backgroundColor: const Color(0xFFF4F6FB),
 
       body: Stack(
@@ -49,7 +93,7 @@ class TaskOverviewPage extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
+                        onPressed: () => Get.back(),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -230,25 +274,86 @@ class TaskOverviewPage extends StatelessWidget {
 
                           const SizedBox(height: 25),
 
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Get.to(PlaceBidPage(task: task,));
-                              },
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                backgroundColor: const Color(0xFF1FA2FF),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              child: const Text(
-                                "Place a Bid",
-                                style: TextStyle(fontSize: 16,
-                                color: Colors.white),
-                              ),
-                            ),
+                          StreamBuilder(
+                            stream: FirebaseDatabase.instance
+                                .ref("codebid_database")
+                                .child("users")
+                                .child(FirebaseAuth.instance.currentUser!.uid)
+                                .onValue,
+                            builder: (context, userSnap) {
+
+                              if (!userSnap.hasData ||
+                                  userSnap.data!.snapshot.value == null) {
+                                return const SizedBox();
+                              }
+
+                              final role =
+                              (userSnap.data!.snapshot.value as Map)["role"];
+
+                              return StreamBuilder(
+                                stream: FirebaseDatabase.instance
+                                    .ref("codebid_database")
+                                    .child("tasks")
+                                    .child(task["taskId"])
+                                    .onValue,
+                                builder: (context, taskSnap) {
+
+                                  if (!taskSnap.hasData ||
+                                      taskSnap.data!.snapshot.value == null) {
+                                    return const SizedBox();
+                                  }
+
+                                  final data = Map<String, dynamic>.from(
+                                      taskSnap.data!.snapshot.value as Map);
+
+                                  final isClosed = data["isClosed"] == true;
+
+                                  return SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+
+                                      onPressed: role == "requester"
+                                          ? () {
+                                        Get.to(TasksAllBids(
+                                          taskId: task["taskId"],
+                                          taskTitle: task["title"],
+                                          createdBy: task["createdBy"],
+                                        ));
+                                      }
+                                          : isClosed
+                                          ? null
+                                          : () {
+                                        Get.to(PlaceBidPage(task: task));
+                                      },
+
+                                      style: ElevatedButton.styleFrom(
+                                        padding:
+                                        const EdgeInsets.symmetric(vertical: 14),
+                                        backgroundColor:
+                                        (role == "requester" || isClosed)
+                                            ? Colors.blue
+                                            : const Color(0xFF1FA2FF),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                        ),
+                                      ),
+
+                                      child: Text(
+                                        isClosed
+                                            ? "Bidding Closed"
+                                            : role == "requester"
+                                            ? "View Bids"
+                                            : "Place a Bid",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                           ),
 
                           const SizedBox(height: 20),

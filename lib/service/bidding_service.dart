@@ -34,7 +34,7 @@ class BidService {
     }
 
     bool isValid = true;
-    int currentLowest = 0;
+    int? currentLowest = 0;
 
     try {
       await ref.child(taskId).runTransaction((currentData) {
@@ -43,18 +43,18 @@ class BidService {
         final data = Map<String, dynamic>.from(currentData as Map);
 
         final budget =
-            int.tryParse(data["budget"]?.toString() ?? "") ?? 0;
+            int.tryParse(data["budget"]?.toString() ?? "");
 
         currentLowest =
-            int.tryParse(data["lowestBid"]?.toString() ?? "") ?? budget;
+            int.tryParse(data["lowestBid"]?.toString() ?? "");
 
-        if (enteredBid >= currentLowest) {
+        if (enteredBid >= currentLowest!) {
           isValid = false;
           return Transaction.abort();
         }
 
         data["lowestBid"] = enteredBid;
-        data["lowestBidder"] = user.uid;
+        data["lowestBidder"] = user.displayName;
 
         return Transaction.success(data);
       });
@@ -67,12 +67,39 @@ class BidService {
         return;
       }
 
-      await ref.child(taskId).child("bids").push().set({
-        "amount": enteredBid,
-        "userId": user.uid,
-        "userName": user.displayName ?? "Anonymous",
-        "timestamp": DateTime.now().millisecondsSinceEpoch,
-      });
+      final bidsRef = ref.child(taskId).child("bids");
+      final snapshot = await bidsRef.get();
+
+      String? existingBidKey;
+
+      if (snapshot.exists && snapshot.value != null) {
+        final data =
+        Map<String, dynamic>.from(snapshot.value as Map);
+
+        data.forEach((bidKey, bidData) {
+          final bid = Map<String, dynamic>.from(bidData);
+          if (bid["userId"] == user.uid) {
+            existingBidKey = bidKey;
+          }
+        });
+      }
+
+      if (existingBidKey != null) {
+        await bidsRef.child(existingBidKey!).update({
+          "amount": enteredBid,
+          "timestamp": DateTime.now().millisecondsSinceEpoch,
+          "status": "pending",
+        });
+      } else {
+        await bidsRef.push().set({
+          "amount": enteredBid,
+          "userId": user.uid,
+          "userName": user.displayName ?? "Anonymous",
+          "timestamp": DateTime.now().millisecondsSinceEpoch,
+          "status": "pending",
+        });
+      }
+
       Get.back();
       SnackbarUtils.show("Success", "Bid placed successfully");
 

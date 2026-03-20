@@ -12,7 +12,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
 
 class CreateTaskPage extends StatefulWidget {
-  const CreateTaskPage({super.key});
+  final bool isEdit;
+  final Map? task;
+
+  const CreateTaskPage({
+    super.key,
+    this.isEdit = false,
+    this.task,
+  });
 
   @override
   State<CreateTaskPage> createState() => _CreateTaskPageState();
@@ -25,9 +32,27 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   final githubLinkController = TextEditingController();
 
   List<File> imageFiles = [];
+  List<String> existingImages = [];
+
   final picker = ImagePicker();
 
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.isEdit && widget.task != null) {
+      taskTitleController.text = widget.task!["title"] ?? "";
+      descTitleController.text = widget.task!["description"] ?? "";
+      budgetTitleController.text =
+          widget.task!["budget"]?.toString() ?? "";
+      githubLinkController.text = widget.task!["github"] ?? "";
+
+      existingImages =
+      List<String>.from(widget.task!["images"] ?? []);
+    }
+  }
 
   Future pickImages() async {
     final picked = await picker.pickMultiImage();
@@ -70,9 +95,12 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     return urls;
   }
 
-  Future createTask() async {
+  Future submitTask() async {
     final user = FirebaseAuth.instance.currentUser;
-    final taskId = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final taskId = widget.isEdit
+        ? widget.task!["taskId"]
+        : DateTime.now().millisecondsSinceEpoch.toString();
 
     if (taskTitleController.text.isEmpty ||
         descTitleController.text.isEmpty ||
@@ -81,54 +109,75 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       return;
     }
 
+    final budget =
+        int.tryParse(budgetTitleController.text.trim()) ?? 0;
+
     setState(() {
       isLoading = true;
     });
 
-    List<String> imageUrls = [];
+    List<String> imageUrls = existingImages;
 
     try {
       if (imageFiles.isNotEmpty) {
-        imageUrls = await uploadImages(imageFiles);
+        final uploaded = await uploadImages(imageFiles);
+        imageUrls = [...existingImages, ...uploaded];
       }
 
       final ref = FirebaseDatabase.instance
           .ref("codebid_database")
           .child("tasks")
           .child(taskId);
-      final userref = FirebaseDatabase.instance.ref("codebid_database").
-    child("users").child("${user!.uid}").child("taskCreated").push();
 
-      await ref.set({
+      final userref = FirebaseDatabase.instance
+          .ref("codebid_database")
+          .child("users")
+          .child(user!.uid)
+          .child("taskCreated")
+          .child(taskId);
+
+      await ref.update({
         "taskId": taskId,
         "title": taskTitleController.text,
         "description": descTitleController.text,
-        "budget": budgetTitleController.text,
+        "budget": budget,
         "github": githubLinkController.text,
         "images": imageUrls,
-        "createdBy": user!.uid,
-        "highestBid": 0,
+        "createdBy": user.uid,
+        "lowestBid": budget,
         "timestamp": ServerValue.timestamp,
         "createdAt": DateTime.now().toString(),
+        "status": "pending",
+        "isClosed": widget.task?["isClosed"] ?? false,
       });
 
-      await userref.set({
-        "taskId": taskId,
+      await userref.update({
         "title": taskTitleController.text,
         "description": descTitleController.text,
-        "budget": budgetTitleController.text,
+        "budget": budget,
         "github": githubLinkController.text,
         "images": imageUrls,
-        "createdBy": user!.uid,
-        "highestBid": 0,
-        "timestamp": ServerValue.timestamp,
-        "createdAt": DateTime.now().toString(),
       });
 
-      Get.snackbar("Success", "Task Posted Successfully");
       Get.back();
+      SnackbarUtils.show(
+        "Success",
+        widget.isEdit
+            ? "Task updated successfully"
+            : "Task created successfully",
+      );
+
+
+
     } catch (e) {
-      SnackbarUtils.show("Error Creating Task", e.toString());
+
+      SnackbarUtils.show(
+        "Error",
+        widget.isEdit
+            ? "Failed to update task"
+            : "Failed to create task",
+      );
+
     }
 
     setState(() {
@@ -138,7 +187,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery.sizeOf(context).height;
+    final height = MediaQuery.sizeOf(context).height;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -150,7 +199,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
               child: Material(
                 color: Colors.transparent,
                 child: GradientHeader(
-                  title: "Create task",
+                  title:
+                  widget.isEdit ? "Edit Task" : "Create Task",
                   boxheight: 0.2,
                 ),
               ),
@@ -173,17 +223,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   SizedBox(height: height * 0.02),
                   AuthTextField(
-
                     hint: "Budget",
                     icon: Icons.currency_rupee,
-                    suffixIcon: Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("in rupees"),
-                        ],
-                      ),
-                    ),
                     controller: budgetTitleController,
                   ),
                   SizedBox(height: height * 0.02),
@@ -193,6 +234,34 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                     controller: githubLinkController,
                   ),
                   SizedBox(height: height * 0.02),
+
+                  if (existingImages.isNotEmpty)
+                    SizedBox(
+                      height: 90,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: existingImages.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding:
+                            const EdgeInsets.only(right: 8),
+                            child: ClipRRect(
+                              borderRadius:
+                              BorderRadius.circular(12),
+                              child: Image.network(
+                                existingImages[index],
+                                height: 80,
+                                width: 80,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                  const SizedBox(height: 10),
+
                   GestureDetector(
                     onTap: pickImages,
                     child: Container(
@@ -201,46 +270,17 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       decoration: BoxDecoration(
                         color: const Color(0xFFF3F5F7),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300),
                       ),
-                      child: imageFiles.isEmpty
-                          ? SizedBox(
-                        height: 60,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.camera_alt_outlined),
-                            SizedBox(width: 8),
-                            Text("Upload Screenshots"),
-                          ],
-                        ),
-                      )
-                          : SizedBox(
-                        height: 90,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: imageFiles.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  imageFiles[index],
-                                  height: 80,
-                                  width: 80,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                      child: const Center(
+                        child: Text("Upload Images"),
                       ),
                     ),
                   ),
+
                   SizedBox(height: height * 0.03),
+
                   GestureDetector(
-                    onTap: isLoading ? null : createTask,
+                    onTap: isLoading ? null : submitTask,
                     child: Container(
                       height: 55,
                       width: double.infinity,
@@ -258,9 +298,11 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                             ? const CircularProgressIndicator(
                           color: Colors.white,
                         )
-                            : const Text(
-                          "Post Task",
-                          style: TextStyle(
+                            : Text(
+                          widget.isEdit
+                              ? "Update Task"
+                              : "Post Task",
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

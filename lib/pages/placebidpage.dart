@@ -16,6 +16,7 @@ class PlaceBidPage extends StatelessWidget {
   final ref = FirebaseDatabase.instance
       .ref("codebid_database")
       .child("tasks");
+  late final userRef = FirebaseDatabase.instance.ref("codebid_database").child("users").child(user!.uid);
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,7 @@ class PlaceBidPage extends StatelessWidget {
                       onPressed: () => Get.back(),
                     ),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         "Place Bid",
                         style: TextStyle(
@@ -166,26 +167,54 @@ class PlaceBidPage extends StatelessWidget {
                           const SizedBox(height: 25),
                           SizedBox(
                             width: double.infinity,
-                            child: ElevatedButton(
-                                onPressed: (){
-                                  BidService.placeBid(task: task, bidText: bidController.text);
-                                },
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 14),
-                                backgroundColor:
-                                const Color(0xFF1FA2FF),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.circular(14),
-                                ),
-                              ),
-                              child: const Text(
-                                "Submit Bid",
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white),
-                              ),
+                            child: StreamBuilder(
+                              stream: FirebaseDatabase.instance
+                                  .ref("codebid_database")
+                                  .child("tasks")
+                                  .child(task["taskId"])
+                                  .onValue,
+                              builder: (context, snapshot) {
+
+                                if (!snapshot.hasData ||
+                                    snapshot.data!.snapshot.value == null) {
+                                  return const SizedBox();
+                                }
+
+                                final data = Map<String, dynamic>.from(
+                                    snapshot.data!.snapshot.value as Map);
+
+                                final isClosed = data["isClosed"] == true;
+
+                                return SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                      onPressed: isClosed
+                                          ? null
+                                          : () async {
+                                        await BidService.placeBid(
+                                          task: task,
+                                          bidText: bidController.text,
+                                        );
+                                      },
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      backgroundColor: isClosed
+                                          ? Colors.grey
+                                          : const Color(0xFF1FA2FF),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      isClosed ? "Bidding Closed" : "Place a Bid",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(height: 20),

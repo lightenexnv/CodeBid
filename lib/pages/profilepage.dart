@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:codebid/controllers/auth_controller.dart';
+import 'package:codebid/controllers/nav_controller.dart';
 import 'package:codebid/pages/auth_pages/loginpage.dart';
 import 'package:codebid/pages/welcomepage.dart';
 import 'package:codebid/utils/snackbarPopup.dart';
@@ -132,7 +133,7 @@ class ProfilePage extends StatelessWidget {
                           tileColor: Colors.white,
                           textColor: Colors.black,
                           onTap: () {
-                            Get.to(() => ());
+                            Get.find<NavController>().changeIndex(1);
                           },
                         ),
 
@@ -142,7 +143,7 @@ class ProfilePage extends StatelessWidget {
                           tileColor: Colors.white,
                           textColor: Colors.black,
                           onTap: () {
-                            Get.to(() => ());
+                            Get.find<NavController>().changeIndex(3);
                           },
                         ),
 

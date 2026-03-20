@@ -68,7 +68,8 @@ class Homepage extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.notifications_none),
                           color: Colors.white,
-                          onPressed: () {},
+                          onPressed: () {
+                          },
                         ),
                         const SizedBox(width: 15),
                         GestureDetector(
@@ -132,6 +133,12 @@ class Homepage extends StatelessWidget {
                       final task = Map<String,dynamic>.from(tasks[index]);
                       final images = task["images"] ?? [];
                       final createdAt = task["createdAt"];
+                      final bidsMap = task["bids"] != null
+                          ? Map<String, dynamic>.from(task["bids"])
+                          : {};
+
+                      final bidCount = bidsMap.length;
+                      final isClosed = task["isClosed"] == true;
 
                       int timestamp = 0;
 
@@ -150,6 +157,7 @@ class Homepage extends StatelessWidget {
                       if (timestamp == 0) {
                         return const Text("Invalid date");
                       }
+
 
 
                       return GestureDetector(
@@ -215,25 +223,69 @@ class Homepage extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 12),
                                         Text(
-                                          "${task["bids"] ?? 0} Bids",
+                                          "${bidCount} Bids",
                                           style: const TextStyle(
                                             color: Colors.grey,
                                             fontSize: 13,
                                           ),
                                         ),
+
+
                                       ],
                                     ),
 
                                     const SizedBox(height: 6),
 
 
-                                     Text(
-                                      TimeUtils.getTimeAgo(timestamp),
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12,
-                                      ),
-                                    ),
+                                     Row(
+                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                       children: [
+                                         Text(
+                                          TimeUtils.getTimeAgo(timestamp),
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                         ),
+                                         ...[
+                                           if (isClosed)
+                                             Container(
+                                               padding: const EdgeInsets.symmetric(
+                                                   horizontal: 10, vertical: 4),
+                                               decoration: BoxDecoration(
+                                                 color: Colors.red.withOpacity(0.1),
+                                                 borderRadius: BorderRadius.circular(10),
+                                               ),
+                                               child: const Text(
+                                                 "Closed",
+                                                 style: TextStyle(
+                                                   color: Colors.red,
+                                                   fontSize: 12,
+                                                   fontWeight: FontWeight.bold,
+                                                 ),
+                                               ),
+                                             )
+                                           else
+                                             Container(
+                                               padding: const EdgeInsets.symmetric(
+                                                   horizontal: 10, vertical: 4),
+                                               decoration: BoxDecoration(
+                                                 color: Colors.green.withOpacity(0.1),
+                                                 borderRadius: BorderRadius.circular(10),
+                                               ),
+                                               child: const Text(
+                                                 "Active",
+                                                 style: TextStyle(
+                                                   color: Colors.green,
+                                                   fontSize: 12,
+                                                   fontWeight: FontWeight.bold,
+                                                 ),
+                                               ),
+                                             ),
+                                         ]
+                                       ],
+                                     ),
+
                                   ],
                                 ),
                               ),
