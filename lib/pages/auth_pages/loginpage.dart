@@ -1,5 +1,5 @@
 import 'package:codebid/controllers/auth_controller.dart';
-import 'package:codebid/controllers/auth_page_controller.dart';
+import 'package:codebid/controllers/page_controllers/auth_page_controller.dart';
 import 'package:codebid/pages/auth_pages/signuppage.dart';
 import 'package:codebid/pages/main_navigation.dart';
 import 'package:codebid/pages/rolepage.dart';

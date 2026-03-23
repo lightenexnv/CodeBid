@@ -1,8 +1,7 @@
-
 import 'package:codebid/controllers/nav_controller.dart';
+import 'package:codebid/controllers/page_controllers/homepage_controller.dart';
 import 'package:codebid/pages/taskoverviewpage.dart';
 import 'package:codebid/utils/timeUtil.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,11 +10,8 @@ class Homepage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(HomepageController());
     final height = MediaQuery.sizeOf(context).height;
-
-    final ref = FirebaseDatabase.instance
-        .ref("codebid_database")
-        .child("tasks");
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FB),
@@ -68,8 +64,7 @@ class Homepage extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.notifications_none),
                           color: Colors.white,
-                          onPressed: () {
-                          },
+                          onPressed: () {},
                         ),
                         const SizedBox(width: 15),
                         GestureDetector(
@@ -110,191 +105,153 @@ class Homepage extends StatelessWidget {
           ),
 
           Expanded(
-              child: StreamBuilder(stream: ref.onValue,
-                  builder: (context, snapshot){
-                if(!snapshot.hasData||snapshot.data!.snapshot.value==null){
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF1FA2FF),
-                    ),
-                  );
-                }
-
-                final data = Map<String,dynamic>.from(
-                    snapshot.data!.snapshot.value as Map
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF1FA2FF),
+                  ),
                 );
-                final tasks = data.values.toList();
+              }
 
+              if (controller.tasks.isEmpty) {
+                return const Center(child: Text("No Tasks Found"));
+              }
 
-                return ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                  itemCount: tasks.length,
-                    itemBuilder: (context,index){
-                      final task = Map<String,dynamic>.from(tasks[index]);
-                      final images = task["images"] ?? [];
-                      final createdAt = task["createdAt"];
-                      final bidsMap = task["bids"] != null
-                          ? Map<String, dynamic>.from(task["bids"])
-                          : {};
+              return ListView.builder(
+                padding: const EdgeInsets.all(12),
+                itemCount: controller.tasks.length,
+                itemBuilder: (context, index) {
+                  final task = controller.tasks[index];
 
-                      final bidCount = bidsMap.length;
-                      final isClosed = task["isClosed"] == true;
+                  final images = task["images"] ?? [];
+                  final bidsMap = task["bids"] != null
+                      ? Map<String, dynamic>.from(task["bids"])
+                      : {};
 
-                      int timestamp = 0;
+                  final bidCount = bidsMap.length;
+                  final isClosed = task["isClosed"] == true;
+                  final timestamp = task["timestamp"];
 
-                      if (createdAt is int) {
-                        timestamp = createdAt;
-                      }
-                      else if (createdAt is String && createdAt.isNotEmpty) {
-                        try {
-                          final parsedDate = DateTime.parse(createdAt);
-                          timestamp = parsedDate.millisecondsSinceEpoch;
-                        } catch (e) {
-                          timestamp = 0;
-                        }
-                      }
+                  return GestureDetector(
+                    onTap: () {
+                      Get.to(TaskOverviewPage(task: task));
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 12,
+                          )
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
 
-                      if (timestamp == 0) {
-                        return const Text("Invalid date");
-                      }
+                          if (images.isNotEmpty)
+                            ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(20),
+                              ),
+                              child: Image.network(
+                                images[0],
+                                height: 160,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
 
+                          Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
 
-
-                      return GestureDetector(
-                        onTap: () {
-                          Get.to(TaskOverviewPage(task: task));
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 14),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 12,
-                              )
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-
-                              if (images.isNotEmpty)
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(20),
+                                Text(
+                                  task["title"]?.toString() ?? "",
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  child: Image.network(
-                                    images[0],
-                                    height: 160,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
 
-                              Padding(
-                                padding: const EdgeInsets.all(14),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                const SizedBox(height: 10),
+
+                                Row(
                                   children: [
-
                                     Text(
-                                      task["title"]?.toString() ?? "",
+                                      "₹ ${task["budget"]}",
                                       style: const TextStyle(
-                                        fontSize: 16,
+                                        color: Color(0xFF1FA2FF),
                                         fontWeight: FontWeight.bold,
+                                        fontSize: 15,
                                       ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-
-                                    const SizedBox(height: 10),
-
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "₹ ${task["budget"]}",
-                                          style: const TextStyle(
-                                            color: Color(0xFF1FA2FF),
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          "${bidCount} Bids",
-                                          style: const TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-
-
-                                      ],
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      "$bidCount Bids",
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 13,
+                                      ),
                                     ),
-
-                                    const SizedBox(height: 6),
-
-
-                                     Row(
-                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                       children: [
-                                         Text(
-                                          TimeUtils.getTimeAgo(timestamp),
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                         ),
-                                         ...[
-                                           if (isClosed)
-                                             Container(
-                                               padding: const EdgeInsets.symmetric(
-                                                   horizontal: 10, vertical: 4),
-                                               decoration: BoxDecoration(
-                                                 color: Colors.red.withOpacity(0.1),
-                                                 borderRadius: BorderRadius.circular(10),
-                                               ),
-                                               child: const Text(
-                                                 "Closed",
-                                                 style: TextStyle(
-                                                   color: Colors.red,
-                                                   fontSize: 12,
-                                                   fontWeight: FontWeight.bold,
-                                                 ),
-                                               ),
-                                             )
-                                           else
-                                             Container(
-                                               padding: const EdgeInsets.symmetric(
-                                                   horizontal: 10, vertical: 4),
-                                               decoration: BoxDecoration(
-                                                 color: Colors.green.withOpacity(0.1),
-                                                 borderRadius: BorderRadius.circular(10),
-                                               ),
-                                               child: const Text(
-                                                 "Active",
-                                                 style: TextStyle(
-                                                   color: Colors.green,
-                                                   fontSize: 12,
-                                                   fontWeight: FontWeight.bold,
-                                                 ),
-                                               ),
-                                             ),
-                                         ]
-                                       ],
-                                     ),
-
                                   ],
                                 ),
-                              ),
-                            ],
+
+                                const SizedBox(height: 6),
+
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      TimeUtils.getTimeAgo(timestamp),
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: isClosed
+                                            ? Colors.red.withOpacity(0.1)
+                                            : Colors.green.withOpacity(0.1),
+                                        borderRadius:
+                                        BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        isClosed ? "Closed" : "Active",
+                                        style: TextStyle(
+                                          color: isClosed
+                                              ? Colors.red
+                                              : Colors.green,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    });
-                  })
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
           )
         ],
       ),

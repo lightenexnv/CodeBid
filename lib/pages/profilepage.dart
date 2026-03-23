@@ -1,43 +1,19 @@
-import 'dart:math';
-
-import 'package:codebid/controllers/auth_controller.dart';
 import 'package:codebid/controllers/nav_controller.dart';
-import 'package:codebid/pages/auth_pages/loginpage.dart';
-import 'package:codebid/pages/welcomepage.dart';
-import 'package:codebid/utils/snackbarPopup.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
+import 'package:codebid/controllers/page_controllers/profile_page_controller.dart';
 import 'package:codebid/widgets/profile_page_widgets/menu_item.dart';
 import 'package:codebid/widgets/profile_page_widgets/stat_item.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 class ProfilePage extends StatelessWidget {
   ProfilePage({super.key});
 
-
-
-
-  final controller = AuthController();
-  void logout() async {
-    try {
-      await controller.logout();
-      Get.offAll(() => Welcomepage());
-    } catch (e) {
-      SnackbarUtils.show("Logout Failed", "Something went wrong");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final User? user = FirebaseAuth.instance.currentUser;
-    final DatabaseReference ref = FirebaseDatabase.instance
-        .ref("codebid_database")
-        .child("users")
-        .child(user!.uid);
-    final double height = MediaQuery.sizeOf(context).height;
-    final double width = MediaQuery.sizeOf(context).width;
+    final controller = Get.put(ProfilePageController());
+
+    final height = MediaQuery.sizeOf(context).height;
+    final width = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FB),
@@ -52,8 +28,6 @@ class ProfilePage extends StatelessWidget {
                   Color(0xFF2DD4BF),
                   Color(0xFF1FA2FF),
                 ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(40),
@@ -72,24 +46,19 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                StreamBuilder<DatabaseEvent>(stream: ref.onValue,
-                    builder: (context, AsyncSnapshot<DatabaseEvent> snapshot){
-                  if(!snapshot.hasData||snapshot.data!.snapshot.value==null){
-                    return CircularProgressIndicator();
+                Obx(() {
+                  if (controller.isLoading.value) {
+                    return const CircularProgressIndicator();
                   }
-
-                  final data = Map<String, dynamic>.from(
-                      snapshot.data!.snapshot.value as Map
-                  );
-
                   return Text(
-                      data["name"]?.toString() ?? "User",
-                      style: TextStyle(
+                    controller.name.value,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      ));
-                    }),
+                    ),
+                  );
+                }),
                 const Text(
                   "@neil_v",
                   style: TextStyle(
@@ -111,14 +80,37 @@ class ProfilePage extends StatelessWidget {
                       )
                     ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: const [
-                      StatItem(title: "Tasks", value: "12"),
-                      StatItem(title: "Bids", value: "28"),
-                      StatItem(title: "Won", value: "7"),
-                    ],
-                  ),
+                  child: Obx(() {
+                    if (controller.role.value == "requester") {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          StatItem(
+                            title: "Tasks",
+                            value: controller.totalTasks.value,
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          StatItem(
+                            title: "Tasks",
+                            value: controller.totalTasks.value,
+                          ),
+                          StatItem(
+                            title: "Bids",
+                            value: controller.totalBids.value,
+                          ),
+                          StatItem(
+                            title: "Won",
+                            value: controller.totalWon.value,
+                          ),
+                        ],
+                      );
+                    }
+                  }),
                 ),
                 const SizedBox(height: 25),
                 Expanded(
@@ -136,7 +128,6 @@ class ProfilePage extends StatelessWidget {
                             Get.find<NavController>().changeIndex(1);
                           },
                         ),
-
                         MenuItem(
                           icon: Icons.gavel_outlined,
                           title: "My Bids",
@@ -146,17 +137,13 @@ class ProfilePage extends StatelessWidget {
                             Get.find<NavController>().changeIndex(3);
                           },
                         ),
-
                         MenuItem(
                           icon: Icons.settings_outlined,
                           title: "Settings",
                           tileColor: Colors.white,
                           textColor: Colors.black,
-                          onTap: () {
-                            Get.to(() => ());
-                          },
+                          onTap: () {},
                         ),
-
                         MenuItem(
                           icon: Icons.logout,
                           title: "Logout",
@@ -167,9 +154,7 @@ class ProfilePage extends StatelessWidget {
                               Color(0xFF1FA2FF),
                             ],
                           ),
-                          onTap: () {
-                            logout();
-                          },
+                          onTap: controller.logout,
                         ),
                       ],
                     ),
@@ -183,6 +168,3 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-
-
-
