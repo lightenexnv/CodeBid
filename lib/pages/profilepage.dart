@@ -1,5 +1,7 @@
 import 'package:codebid/controllers/nav_controller.dart';
 import 'package:codebid/controllers/page_controllers/profile_page_controller.dart';
+import 'package:codebid/controllers/profileimagecontroller.dart';
+import 'package:codebid/pages/settingspage.dart';
 import 'package:codebid/widgets/profile_page_widgets/menu_item.dart';
 import 'package:codebid/widgets/profile_page_widgets/stat_item.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ProfilePageController());
+    final profileController = Get.put(ProfileImageController());
 
     final height = MediaQuery.sizeOf(context).height;
     final width = MediaQuery.sizeOf(context).width;
@@ -39,12 +42,13 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                const CircleAvatar(
+                Obx(() => CircleAvatar(
                   radius: 50,
-                  backgroundImage: NetworkImage(
-                    "https://i.pravatar.cc/200",
-                  ),
-                ),
+                  backgroundImage: profileController.profileImage.value.isNotEmpty
+                      ? NetworkImage(profileController.profileImage.value)
+                      : const AssetImage("assets/icons/default-profile.png")
+                  as ImageProvider,
+                )),
                 const SizedBox(height: 10),
                 Obx(() {
                   if (controller.isLoading.value) {
@@ -86,7 +90,7 @@ class ProfilePage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           StatItem(
-                            title: "Tasks",
+                            title: "Pending",
                             value: controller.totalTasks.value,
                           ),
                         ],
@@ -96,7 +100,7 @@ class ProfilePage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           StatItem(
-                            title: "Tasks",
+                            title: "Pending",
                             value: controller.totalTasks.value,
                           ),
                           StatItem(
@@ -134,7 +138,13 @@ class ProfilePage extends StatelessWidget {
                           tileColor: Colors.white,
                           textColor: Colors.black,
                           onTap: () {
-                            Get.find<NavController>().changeIndex(3);
+                            final controller = Get.find<ProfilePageController>();
+
+                            if (controller.role.value == "requester") {
+                              Get.find<NavController>().changeIndex(3);
+                            } else {
+                              Get.find<NavController>().changeIndex(2);
+                            }
                           },
                         ),
                         MenuItem(
@@ -142,7 +152,10 @@ class ProfilePage extends StatelessWidget {
                           title: "Settings",
                           tileColor: Colors.white,
                           textColor: Colors.black,
-                          onTap: () {},
+                          onTap: () {
+                            Get.to(SettingsPage());
+
+                          },
                         ),
                         MenuItem(
                           icon: Icons.logout,

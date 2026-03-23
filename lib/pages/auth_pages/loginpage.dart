@@ -81,6 +81,44 @@ class Loginpage extends StatelessWidget {
     }
   }
 
+
+  void showForgotPasswordDialog(BuildContext context) {
+    final resetEmailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Reset Password"),
+          content: TextField(
+            controller: resetEmailController,
+            decoration: const InputDecoration(
+              hintText: "Enter your email",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                if (resetEmailController.text.trim().isNotEmpty) {
+                  controller.resetPassword(resetEmailController.text.trim());
+                  Navigator.pop(context);
+                } else {
+                  Get.snackbar("Error", "Please enter an email");
+                }
+              },
+              child: const Text("Send Reset Link"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.sizeOf(context).height;
@@ -150,6 +188,8 @@ class Loginpage extends StatelessWidget {
                       ),
                     )),
 
+
+
                     SizedBox(height: height * 0.03),
 
                     InkWell(
@@ -174,6 +214,22 @@ class Loginpage extends StatelessWidget {
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: height * 0.02),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: InkWell(
+                        onTap: () {
+                          showForgotPasswordDialog(context);
+                        },
+                        child: const Text(
+                          "Forgot Password?",
+                          style: TextStyle(
+                            color: Color(0xFF1FA2FF),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

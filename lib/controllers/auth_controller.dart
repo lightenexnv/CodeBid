@@ -21,6 +21,10 @@ class AuthController extends GetxController {
     return await _service.signInWithGoogle();
   }
 
+  Future<void> resetPassword(String email) async {
+    await _service.resetPassword(email);
+  }
+
   Future<User?> signInWithGithub() async {
     return await _service.signInWithGithub();
   }

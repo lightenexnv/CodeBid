@@ -1,5 +1,7 @@
 import 'package:codebid/controllers/nav_controller.dart';
 import 'package:codebid/controllers/page_controllers/homepage_controller.dart';
+import 'package:codebid/controllers/page_controllers/profile_page_controller.dart';
+import 'package:codebid/controllers/profileimagecontroller.dart';
 import 'package:codebid/pages/taskoverviewpage.dart';
 import 'package:codebid/utils/timeUtil.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +12,10 @@ class Homepage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final profileController = Get.put(ProfileImageController());
     final controller = Get.put(HomepageController());
     final height = MediaQuery.sizeOf(context).height;
+    final ProfilePageController profilePageController = Get.put(ProfilePageController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FB),
@@ -69,14 +73,21 @@ class Homepage extends StatelessWidget {
                         const SizedBox(width: 15),
                         GestureDetector(
                           onTap: () {
-                            Get.find<NavController>().changeIndex(4);
+                            final role = Get.find<ProfilePageController>().role.value;
+
+                            if (role == "requester") {
+                              Get.find<NavController>().changeIndex(4);
+                            } else {
+                              Get.find<NavController>().changeIndex(3);
+                            }
                           },
-                          child: const CircleAvatar(
+                          child: Obx(() => CircleAvatar(
                             radius: 16,
-                            backgroundImage: AssetImage(
-                              "assets/logo/codebid-logo-only-color.png",
-                            ),
-                          ),
+                            backgroundImage: profileController.profileImage.value.isNotEmpty
+                                ? NetworkImage(profileController.profileImage.value)
+                                : const AssetImage("assets/icons/default-profile.png")
+                            as ImageProvider,
+                          )),
                         ),
                       ],
                     )

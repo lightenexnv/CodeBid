@@ -38,7 +38,7 @@ class Welcomepage extends StatelessWidget {
                     height: height*0.15
                   ),
                   SizedBox(height: height*0.01,),
-                  Text("CodeBid - Solve Bugs\nWin Bids & Build\nOr Get Solved",
+                  Text("CodeBid - \nTurn Bugs Into \nOpportunities",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: height*0.035,

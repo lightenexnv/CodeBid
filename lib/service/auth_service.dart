@@ -33,6 +33,15 @@ class AuthService {
     }
   }
 
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      SnackbarUtils.show("Password Reset", "Email sent to $email");
+    } on FirebaseAuthException catch (e) {
+      SnackbarUtils.show("Error","Failed to send reset email");
+    }
+  }
+
   Future<void> logout() async {
     try {
 

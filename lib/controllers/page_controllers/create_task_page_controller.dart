@@ -90,15 +90,43 @@ class CreateTaskPageController extends GetxController {
         ? task!["taskId"]
         : DateTime.now().millisecondsSinceEpoch.toString();
 
-    if (taskTitleController.text.isEmpty ||
-        descTitleController.text.isEmpty ||
-        budgetTitleController.text.isEmpty) {
-      Get.snackbar("Error", "Please fill all fields");
+    final title = taskTitleController.text.trim();
+    final desc = descTitleController.text.trim();
+    final budgetText = budgetTitleController.text.trim();
+    final github = githubLinkController.text.trim();
+
+    if (title.isEmpty || desc.isEmpty || budgetText.isEmpty) {
+      SnackbarUtils.show("Error", "Please fill all fields");
       return;
     }
 
-    final budget =
-        int.tryParse(budgetTitleController.text.trim()) ?? 0;
+    if (title.length < 10) {
+      SnackbarUtils.show("Error", "Title must be at least 10 characters");
+      return;
+    }
+
+    if (desc.length < 100) {
+      SnackbarUtils.show("Error", "Description must be at least 100 characters");
+      return;
+    }
+
+    final budget = int.tryParse(budgetText);
+    if (budget == null || budget <= 0) {
+      SnackbarUtils.show("Error", "Budget must be a valid number");
+      return;
+    }
+
+    if (github.isNotEmpty &&
+        (!github.contains("github.com") ||
+            Uri.tryParse(github)?.isAbsolute != true)) {
+      SnackbarUtils.show("Error", "Enter a valid GitHub link");
+      return;
+    }
+
+    if (imageFiles.isEmpty && existingImages.isEmpty) {
+      SnackbarUtils.show("Error", "Please upload at least one image");
+      return;
+    }
 
     isLoading.value = true;
 
@@ -124,10 +152,10 @@ class CreateTaskPageController extends GetxController {
 
       await ref.update({
         "taskId": taskId,
-        "title": taskTitleController.text,
-        "description": descTitleController.text,
+        "title": title,
+        "description": desc,
         "budget": budget,
-        "github": githubLinkController.text,
+        "github": github,
         "images": imageUrls,
         "createdBy": user.uid,
         "lowestBid": budget,
@@ -138,12 +166,13 @@ class CreateTaskPageController extends GetxController {
       });
 
       await userref.update({
-        "title": taskTitleController.text,
-        "description": descTitleController.text,
+        "title": title,
+        "description": desc,
         "budget": budget,
-        "github": githubLinkController.text,
+        "github": github,
         "images": imageUrls,
       });
+
       taskTitleController.clear();
       descTitleController.clear();
       budgetTitleController.clear();
@@ -153,16 +182,14 @@ class CreateTaskPageController extends GetxController {
       existingImages.clear();
 
       Get.find<NavController>().changeIndex(0);
-
       Get.back();
+
       SnackbarUtils.show(
         "Success",
         isEdit
             ? "Task updated successfully"
             : "Task created successfully",
       );
-
-
     } catch (e) {
       SnackbarUtils.show(
         "Error",
@@ -173,6 +200,5 @@ class CreateTaskPageController extends GetxController {
     }
 
     isLoading.value = false;
-
   }
 }

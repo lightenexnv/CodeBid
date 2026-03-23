@@ -229,6 +229,7 @@ class Signuppage extends StatelessWidget {
                       ),
                     ),),
                     SizedBox(height: height * 0.02),
+
                     Obx(() => AuthTextField(
                       hint: "Confirm Password",
                       icon: Icons.lock_outline,

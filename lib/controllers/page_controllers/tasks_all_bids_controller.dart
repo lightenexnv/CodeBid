@@ -68,17 +68,26 @@ class TasksAllBidsController extends GetxController {
       "status": "accepted"
     });
 
-    await taskRef.update({
-      "isClosed": true,
-    });
-
+    String? solverUid;
     for (var child in snapshot.children) {
-      if (child.key != bidId) {
+      if (child.key == bidId) {
+        final bidData = Map<String, dynamic>.from(child.value as Map);
+        solverUid = bidData["userId"];
+      } else {
         bidsRef.child(child.key!).update({
           "status": "declined"
         });
       }
     }
+
+    final updateData = <String, dynamic>{
+      "isClosed": true,
+    };
+    if (solverUid != null) {
+      updateData["bidWonBy"] = solverUid;
+    }
+
+    await taskRef.update(updateData);
   }
 
   Future declineBid(String bidId) async {

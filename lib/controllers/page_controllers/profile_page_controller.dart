@@ -61,11 +61,13 @@ class ProfilePageController extends GetxController {
         data.forEach((taskId, value) {
           final task = Map<String, dynamic>.from(value);
 
-          if (task["createdBy"] == user!.uid) {
-            tasksCount++;
-          }
+          if (role.value == "requester") {
+            if (task["createdBy"] == user!.uid && task["isClosed"] != true) {
+              tasksCount++;
+            }
+          } else if (role.value == "solver") {
+            bool userBidOnThis = false;
 
-          if (role.value == "solver") {
             if (task["bids"] != null) {
               final bids = Map<String, dynamic>.from(task["bids"]);
 
@@ -74,13 +76,30 @@ class ProfilePageController extends GetxController {
 
                 if (bid["userId"] == user!.uid) {
                   bidsCount++;
+                  userBidOnThis = true;
                 }
               });
             }
 
-            if (task["isClosed"] == true &&
-                task["lowestBidder"] == name.value) {
-              wonCount++;
+            if (userBidOnThis && task["isClosed"] != true) {
+              tasksCount++;
+            }
+
+            if (task["isClosed"] == true) {
+              if (task["bidWonBy"] == user!.uid) {
+                wonCount++;
+              } else if (task["bids"] != null) {
+                final bids = Map<String, dynamic>.from(task["bids"]);
+
+                bids.forEach((bidId, bidValue) {
+                  final bid = Map<String, dynamic>.from(bidValue);
+
+                  if (bid["userId"] == user!.uid &&
+                      bid["status"] == "accepted") {
+                    wonCount++;
+                  }
+                });
+              }
             }
           }
         });
