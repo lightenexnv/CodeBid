@@ -155,7 +155,7 @@ class Homepage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 12,
                           )
                         ],
@@ -235,8 +235,8 @@ class Homepage extends StatelessWidget {
                                           horizontal: 10, vertical: 4),
                                       decoration: BoxDecoration(
                                         color: isClosed
-                                            ? Colors.red.withOpacity(0.1)
-                                            : Colors.green.withOpacity(0.1),
+                                            ? Colors.red.withValues(alpha: 0.1)
+                                            : Colors.green.withValues(alpha: 0.1),
                                         borderRadius:
                                         BorderRadius.circular(10),
                                       ),

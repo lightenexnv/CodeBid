@@ -95,7 +95,7 @@ class AllTasksBidPage extends StatelessWidget {
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black
-                                      .withOpacity(0.06),
+                                      .withValues(alpha: 0.06),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 )
@@ -126,9 +126,9 @@ class AllTasksBidPage extends StatelessWidget {
                                         decoration: BoxDecoration(
                                           color: isClosed
                                               ? Colors.red
-                                              .withOpacity(0.1)
+                                              .withValues(alpha: 0.1)
                                               : Colors.orange
-                                              .withOpacity(0.1),
+                                              .withValues(alpha: 0.1),
                                           borderRadius:
                                           BorderRadius.circular(
                                               10),
@@ -205,7 +205,7 @@ class AllTasksBidPage extends StatelessWidget {
                                           vertical: 6),
                                       decoration: BoxDecoration(
                                         color: Colors.green
-                                            .withOpacity(0.1),
+                                            .withValues(alpha: 0.1),
                                         borderRadius:
                                         BorderRadius.circular(
                                             12),

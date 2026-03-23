@@ -81,7 +81,7 @@ class PlaceBidPage extends StatelessWidget {
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black
-                                      .withOpacity(0.05),
+                                      .withValues(alpha: 0.05),
                                   blurRadius: 10,
                                 )
                               ],
@@ -143,7 +143,7 @@ class PlaceBidPage extends StatelessWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black
-                                        .withOpacity(0.05),
+                                        .withValues(alpha: 0.05),
                                     blurRadius: 10,
                                   )
                                 ],

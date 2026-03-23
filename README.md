@@ -76,7 +76,7 @@ As a Solver, you can browse available tasks and bid on the ones you are qualifie
 *Images above (left to right): Solver Home Screen, Task Details (Place Bid Screen), Bidding form, and All Bids History.*
 
 #### 👤 Solver Profile
-Customize your details and showcase your expertise to increase your chances of winning bids.
+A Profile Page Displaying tasks uploade by the requester and tasks or bidding won by the solver which displayes as achievement and can be used to increase the trust rate for requester to accept a bid.
 <br/>
 <img src="assets/githubImages/profilepagesolver.jpg" width="22%" />
 

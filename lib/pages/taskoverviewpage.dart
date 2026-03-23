@@ -96,7 +96,7 @@ class TaskOverviewPage extends StatelessWidget {
                         boxShadow: [
                           BoxShadow(
                             color:
-                            Colors.black.withOpacity(0.15),
+                            Colors.black.withValues(alpha: 0.15),
                             blurRadius: 15,
                           )
                         ],
@@ -134,7 +134,7 @@ class TaskOverviewPage extends StatelessWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black
-                                        .withOpacity(0.05),
+                                        .withValues(alpha: 0.05),
                                     blurRadius: 10,
                                   )
                                 ],
@@ -201,7 +201,7 @@ class TaskOverviewPage extends StatelessWidget {
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black
-                                      .withOpacity(0.05),
+                                      .withValues(alpha: 0.05),
                                   blurRadius: 10,
                                 )
                               ],
@@ -241,7 +241,7 @@ class TaskOverviewPage extends StatelessWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black
-                                        .withOpacity(0.05),
+                                        .withValues(alpha: 0.05),
                                     blurRadius: 10,
                                   )
                                 ],
