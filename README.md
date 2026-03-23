@@ -6,6 +6,16 @@ Built with **Flutter**, **GetX** for state management, and **Firebase** as a rob
 
 ---
 
+## ✨ Key Features
+* 🔐 **Secure Authentication**: Sign Up and Login powered by Firebase Auth.
+* 👥 **Role-Based Experience**: Dedicated dashboards and workflows for Requesters and Solvers.
+* ⚡ **Real-Time Bidding System**: Solvers can seamlessly browse tasks and place competitive bids.
+* 📊 **Task Management**: Requesters can post, monitor, and manage the bids received on their tasks.
+* 📱 **Responsive & Modern UI**: A sleek, cross-platform interface built entirely in Flutter.
+* 🗂️ **Reactive State Management**: Highly efficient UI updates handled smoothly via GetX.
+
+---
+
 ## 🌟 App Roles & Features
 
 CodeBid provides a tailored experience depending on the role you choose upon signing up. 
@@ -33,15 +43,16 @@ As a Requester, your goal is to get your tasks solved efficiently. Here's how to
 **Steps to follow:**
 1. **Home Dashboard**: View an overview of your active and past tasks.
 2. **Create Task**: Easily post a new coding problem. Detail what you need, set a budget or timeframe, and publish it to the solver community.
-3. **Review Bids**: Once Solvers start bidding, review their proposals on your task to find the perfect match.
+3. **Review & Approve Bids**: Once Solvers start bidding, review their proposals on your task and approve the best fit to kick-start the work.
 
 <div align="center">
-  <img src="assets/githubImages/homescreenforrequester.jpg" width="30%" />
-  <img src="assets/githubImages/createtaskscreenrequester.jpg" width="30%" />
-  <img src="assets/githubImages/allbidsmadeonthetaskrequester.jpg" width="30%" />
+  <img src="assets/githubImages/homescreenforrequester.jpg" width="22%" />
+  <img src="assets/githubImages/createtaskscreenrequester.jpg" width="22%" />
+  <img src="assets/githubImages/allbidsmadeonthetaskrequester.jpg" width="22%" />
+  <img src="assets/githubImages/approvebid.jpg" width="22%" />
 </div>
 
-*Images above: Requester Home Screen, Create Task Screen, and All Bids Made on Task screen.*
+*Images above: Requester Home Screen, Create Task, Review Bids, and Approve Bid screens.*
 
 ---
 
@@ -72,9 +83,28 @@ Customize your details and showcase your expertise to increase your chances of w
 ---
 
 ## 🛠️ Technology Stack
-* **Frontend**: Flutter (Cross-platform UI)
-* **State Management**: GetX
-* **Backend**: Firebase (Authentication, Cloud Firestore, Realtime Database, Cloud Storage)
+* **Frontend**: [Flutter](https://flutter.dev/)
+* **State Management**: [GetX](https://pub.dev/packages/get)
+* **Backend**: [Firebase](https://firebase.google.com/) (Auth, Cloud Firestore, Realtime Database, Cloud Storage)
+
+---
+
+## 🏗️ Architecture
+The CodeBid app follows a clean and modular folder structure utilizing the MVC/MVVM principles strongly enforced by **GetX**.
+* **Controllers**: Business logic is decoupled from the UI. Features like user authentication, task fetching, and bid posting are handled by specific GetX controllers (e.g., `AuthController`, `TaskController`).
+* **Views**: UI components and screens built with Flutter widgets, observing the GetX state to perform minimal, targeted rebuilds.
+* **Models**: Dart data classes mapped from Firebase NoSQL schema to represent `User`, `Task`, and `Bid` objects cleanly.
+* **Services/Repositories**: Encapsulated API calls to Firestore and Firebase Auth, ensuring scalability and easy maintenance.
+
+---
+
+## 🚀 Future Improvements
+To take CodeBid to the next level, the following features are planned for upcoming iterations:
+- [ ] 🔔 **Push Notifications**: Notify Requesters when a new bid is placed, and alert Solvers when their bid is approved.
+- [ ] 💬 **In-App Messaging**: Real-time chat system to allow Requesters and Solvers to discuss project details directly.
+- [ ] 💳 **Payment Integration**: Incorporate an escrow payment system (Stripe / Razorpay) for secure milestone releases.
+- [ ] ⭐ **Rating & Review System**: Allow users to rate their experiences, building trust and reputation profiles.
+- [ ] 🔍 **Advanced Filtering**: Search and sort tasks / bids by technology stacks, complexity, or budget tiers.
 
 ---
 
@@ -84,7 +114,7 @@ To run the app locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/lightenexnv/CodeBid.git
    ```
 2. Navigate into the directory:
    ```bash
