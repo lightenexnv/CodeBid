@@ -26,7 +26,6 @@ class MainNavigation extends StatelessWidget {
     return StreamBuilder(
       stream: userRef.onValue,
       builder: (context, snapshot) {
-
         if (!snapshot.hasData ||
             snapshot.data!.snapshot.value == null) {
           return const Scaffold(
@@ -54,72 +53,72 @@ class MainNavigation extends StatelessWidget {
           ProfilePage()
         ];
 
-        return Obx(() => Scaffold(
-          body: pages[controller.selectedIndex.value],
+        return Obx(() {
+          if (controller.selectedIndex.value >= pages.length) {
+            controller.selectedIndex.value = 0;
+          }
 
-          bottomNavigationBar: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: 65,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(35),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 3),
-                    )
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-
-                    _navItem(Icons.home, "Home", 0),
-
-                    _navItem(Icons.check_box_outlined, "Tasks", 1),
-
-                    if (role == "requester")
-                      GestureDetector(
-                        onTap: () {
-                          controller.changeIndex(2);
-                        },
-                        child: Container(
-                          height: 45,
-                          width: 45,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [
-                                Color(0xFF2DD4BF),
-                                Color(0xFF1FA2FF),
-                              ],
+          return Scaffold(
+            body: pages[controller.selectedIndex.value],
+            bottomNavigationBar: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  height: 65,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(35),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 3),
+                      )
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _navItem(Icons.home, "Home", 0),
+                      _navItem(Icons.check_box_outlined, "Tasks", 1),
+                      if (role == "requester")
+                        GestureDetector(
+                          onTap: () {
+                            controller.changeIndex(2);
+                          },
+                          child: Container(
+                            height: 45,
+                            width: 45,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFF2DD4BF),
+                                  Color(0xFF1FA2FF),
+                                ],
+                              ),
                             ),
+                            child: const Icon(Icons.add,
+                                color: Colors.white),
                           ),
-                          child: const Icon(Icons.add,
-                              color: Colors.white),
                         ),
+                      _navItem(
+                        Icons.send_outlined,
+                        "Bids",
+                        role == "requester" ? 3 : 2,
                       ),
-
-                    _navItem(
-                      Icons.send_outlined,
-                      "Bids",
-                      role == "requester" ? 3 : 2,
-                    ),
-
-                    _navItem(
-                      Icons.person_outline,
-                      "Profile",
-                      role == "requester" ? 4 : 3,
-                    ),
-                  ],
+                      _navItem(
+                        Icons.person_outline,
+                        "Profile",
+                        role == "requester" ? 4 : 3,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ));
+          );
+        });
       },
     );
   }
@@ -127,7 +126,7 @@ class MainNavigation extends StatelessWidget {
   Widget _navItem(IconData icon, String label, int index) {
     return GestureDetector(
       onTap: () => controller.changeIndex(index),
-      child: Column(
+      child: Obx(() => Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
@@ -147,7 +146,7 @@ class MainNavigation extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

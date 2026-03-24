@@ -63,13 +63,6 @@ class ProfilePage extends StatelessWidget {
                     ),
                   );
                 }),
-                const Text(
-                  "@neil_v",
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
                 const SizedBox(height: 20),
                 Container(
                   width: width * 0.9,

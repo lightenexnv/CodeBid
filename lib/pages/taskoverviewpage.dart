@@ -2,6 +2,8 @@ import 'package:codebid/controllers/page_controllers/task_overview_page_controll
 import 'package:codebid/pages/createtaskpage.dart';
 import 'package:codebid/pages/placebidpage.dart';
 import 'package:codebid/pages/tasks_all_bids_page.dart';
+import 'package:codebid/pages/user_profile_page.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -95,8 +97,8 @@ class TaskOverviewPage extends StatelessWidget {
                         BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color:
-                            Colors.black.withValues(alpha: 0.15),
+                            color: Colors.black
+                                .withValues(alpha: 0.15),
                             blurRadius: 15,
                           )
                         ],
@@ -134,7 +136,8 @@ class TaskOverviewPage extends StatelessWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black
-                                        .withValues(alpha: 0.05),
+                                        .withValues(
+                                        alpha: 0.05),
                                     blurRadius: 10,
                                   )
                                 ],
@@ -151,32 +154,38 @@ class TaskOverviewPage extends StatelessWidget {
                                         style:
                                         const TextStyle(
                                           fontWeight:
-                                          FontWeight.bold,
+                                          FontWeight
+                                              .bold,
                                           color: Color(
                                               0xFF1FA2FF),
                                           fontSize: 40,
                                         ),
                                       ),
                                       const Text(
-                                          "Lowest Bid",
-                                          style: TextStyle(
-                                              color: Colors
-                                                  .grey)),
+                                        "Lowest Bid",
+                                        style: TextStyle(
+                                            color: Colors
+                                                .grey),
+                                      ),
                                     ],
                                   ),
                                   Row(
                                     children: [
-                                      const Text("Budget",
-                                          style: TextStyle(
-                                              color: Colors
-                                                  .grey)),
-                                      const SizedBox(width: 10),
+                                      const Text(
+                                        "Budget",
+                                        style: TextStyle(
+                                            color: Colors
+                                                .grey),
+                                      ),
+                                      const SizedBox(
+                                          width: 10),
                                       Text(
                                         "₹ ${controller.budget.value}",
                                         style:
                                         const TextStyle(
                                           fontWeight:
-                                          FontWeight.bold,
+                                          FontWeight
+                                              .bold,
                                           color: Color(
                                               0xFF1FA2FF),
                                           fontSize: 16,
@@ -189,6 +198,122 @@ class TaskOverviewPage extends StatelessWidget {
                             );
                           }),
                           const SizedBox(height: 16),
+                          StreamBuilder(
+                            stream: FirebaseDatabase
+                                .instance
+                                .ref("codebid_database")
+                                .child("users")
+                                .child(task["createdBy"])
+                                .onValue,
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData ||
+                                  snapshot.data!.snapshot
+                                      .value ==
+                                      null) {
+                                return const SizedBox();
+                              }
+
+                              final userData =
+                              Map<String, dynamic>.from(
+                                  snapshot.data!.snapshot
+                                      .value as Map);
+
+                              final name =
+                                  userData["name"] ?? "";
+                              final email =
+                                  userData["email"] ?? "";
+                              final image =
+                                  userData["profileImage"] ??
+                                      "";
+
+                              return GestureDetector(
+                                onTap: () {
+                                  Get.to(() =>
+                                      UserProfilePage(
+                                        userId:
+                                        task["createdBy"],
+                                      ));
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding:
+                                  const EdgeInsets.all(
+                                      14),
+                                  margin:
+                                  const EdgeInsets.only(
+                                      bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius:
+                                    BorderRadius
+                                        .circular(18),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withValues(
+                                            alpha:
+                                            0.05),
+                                        blurRadius: 10,
+                                      )
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 25,
+                                        backgroundImage: image
+                                            .isNotEmpty
+                                            ? NetworkImage(
+                                            image)
+                                            : const AssetImage(
+                                            "assets/icons/default-profile.png")
+                                        as ImageProvider,
+                                      ),
+                                      const SizedBox(
+                                          width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment
+                                              .start,
+                                          children: [
+                                            Text(
+                                              name,
+                                              style:
+                                              const TextStyle(
+                                                fontWeight:
+                                                FontWeight
+                                                    .bold,
+                                                fontSize:
+                                                16,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                                height: 4),
+                                            Text(
+                                              email,
+                                              style:
+                                              const TextStyle(
+                                                color:
+                                                Colors
+                                                    .grey,
+                                                fontSize:
+                                                13,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Icon(
+                                          Icons
+                                              .arrow_forward_ios,
+                                          size: 16),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                           Container(
                             width: double.infinity,
                             padding:
@@ -201,7 +326,8 @@ class TaskOverviewPage extends StatelessWidget {
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black
-                                      .withValues(alpha: 0.05),
+                                      .withValues(
+                                      alpha: 0.05),
                                   blurRadius: 10,
                                 )
                               ],
@@ -214,11 +340,13 @@ class TaskOverviewPage extends StatelessWidget {
                                   "Description",
                                   style: TextStyle(
                                       fontWeight:
-                                      FontWeight.bold),
+                                      FontWeight
+                                          .bold),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  task["description"] ?? "",
+                                  task["description"] ??
+                                      "",
                                   style: const TextStyle(
                                       color: Colors.grey),
                                 ),
@@ -241,7 +369,8 @@ class TaskOverviewPage extends StatelessWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black
-                                        .withValues(alpha: 0.05),
+                                        .withValues(
+                                        alpha: 0.05),
                                     blurRadius: 10,
                                   )
                                 ],
@@ -250,7 +379,8 @@ class TaskOverviewPage extends StatelessWidget {
                                 children: [
                                   const Icon(Icons.link,
                                       color: Colors.grey),
-                                  const SizedBox(width: 10),
+                                  const SizedBox(
+                                      width: 10),
                                   Expanded(
                                     child: Text(
                                       task["github"],
@@ -272,8 +402,8 @@ class TaskOverviewPage extends StatelessWidget {
                             return SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed:
-                                controller.role.value ==
+                                onPressed: controller
+                                    .role.value ==
                                     "requester"
                                     ? () {
                                   Get.to(
@@ -296,13 +426,14 @@ class TaskOverviewPage extends StatelessWidget {
                                           task:
                                           task));
                                 },
-                                style: ElevatedButton
-                                    .styleFrom(
+                                style:
+                                ElevatedButton.styleFrom(
                                   padding:
                                   const EdgeInsets
                                       .symmetric(
                                       vertical: 14),
-                                  backgroundColor: const Color(
+                                  backgroundColor:
+                                  const Color(
                                       0xFF1FA2FF),
                                   shape:
                                   RoundedRectangleBorder(
@@ -312,15 +443,16 @@ class TaskOverviewPage extends StatelessWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  controller
-                                      .isTaskClosed.value
+                                  controller.isTaskClosed
+                                      .value
                                       ? "Bidding Closed"
                                       : controller.role
                                       .value ==
                                       "requester"
                                       ? "View Bids"
                                       : "Place a Bid",
-                                  style: const TextStyle(
+                                  style:
+                                  const TextStyle(
                                     fontSize: 16,
                                     color: Colors.white,
                                   ),

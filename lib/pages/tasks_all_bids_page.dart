@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'user_profile_page.dart';
 
 class TasksAllBids extends StatelessWidget {
   final String taskId;
@@ -31,7 +33,6 @@ class TasksAllBids extends StatelessWidget {
       backgroundColor: const Color(0xFFF4F6FB),
       body: Stack(
         children: [
-
           Container(
             height: height * 0.2,
             width: double.infinity,
@@ -52,16 +53,27 @@ class TasksAllBids extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-
                 const SizedBox(height: 20),
 
-                Text(
-                  taskTitle,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Get.back(),
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    ),
+                    Expanded(
+                      child: Text(
+                        taskTitle,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 40),
+                  ],
                 ),
 
                 const SizedBox(height: 20),
@@ -72,8 +84,7 @@ class TasksAllBids extends StatelessWidget {
                     builder: (context, snapshot) {
                       if (!snapshot.hasData ||
                           snapshot.data!.snapshot.value == null) {
-                        return const Center(
-                            child: Text("No Bids Yet"));
+                        return const Center(child: Text("No Bids Yet"));
                       }
 
                       final data = Map<String, dynamic>.from(
@@ -95,145 +106,94 @@ class TasksAllBids extends StatelessWidget {
                           final status = bid["status"] ?? "pending";
                           final isBidOwner = user?.uid == bidderId;
 
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 14),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                )
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+                          return GestureDetector(
+                            onTap: () {
+                              Get.to(() => UserProfilePage(userId: bidderId));
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 14),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ],
+                              ),
+                              child: Row(
+                                children: [
 
-                                Text(
-                                  "₹$amount",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                Text(
-                                  "User: $bidderName",
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 14),
-
-                                if (isTaskOwner) ...[
-
-                                  if (status == "pending")
-                                    Row(
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
 
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            onPressed: () async {
-                                              final snapshot =
-                                              await bidsRef.get();
-                                              final taskRef = FirebaseDatabase.instance
-                                                  .ref("codebid_database")
-                                                  .child("tasks")
-                                                  .child(taskId);
-
-                                              await bidsRef.child(bidId).update({
-                                                "status": "accepted"
-                                              });
-
-                                              await taskRef.update({
-                                                "isClosed": true,
-                                              });
-
-                                              for (var child
-                                              in snapshot.children) {
-                                                if (child.key != bidId) {
-                                                  bidsRef
-                                                      .child(child.key!)
-                                                      .update({
-                                                    "status": "declined"
-                                                  });
-                                                }
-                                              }
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.green,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                BorderRadius.circular(12),
-                                              ),
-                                            ),
-                                            child: Text("Accept",style: TextStyle(color: Colors.white),),
+                                        Text(
+                                          "₹$amount",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
                                           ),
                                         ),
 
-                                        const SizedBox(width: 10),
+                                        const SizedBox(height: 8),
 
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              bidsRef
-                                                  .child(bidId)
-                                                  .update({
-                                                "status": "declined"
-                                              });
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.red,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                BorderRadius.circular(12),
-                                              ),
-                                            ),
-                                            child: const Text("Decline",style: TextStyle(color: Colors.white),),
+                                        Text(
+                                          bidderName,
+                                          style: const TextStyle(color: Colors.grey),
+                                        ),
+
+                                        const SizedBox(height: 10),
+
+                                        Text(
+                                          status.toUpperCase(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: status == "accepted"
+                                                ? Colors.green
+                                                : status == "declined"
+                                                ? Colors.red
+                                                : Colors.orange,
                                           ),
                                         ),
                                       ],
-                                    )
-
-                                  else if (status == "accepted")
-                                    const Text(
-                                      "✅ Accepted",
-                                      style: TextStyle(
-                                        color: Colors.green,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-
-                                  else if (status == "declined")
-                                      const Text(
-                                        "❌ Declined",
-                                        style: TextStyle(
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                ],
-
-                                if (!isTaskOwner && isBidOwner)
-                                  Text(
-                                    status.toUpperCase(),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: status == "accepted"
-                                          ? Colors.green
-                                          : status == "declined"
-                                          ? Colors.red
-                                          : Colors.orange,
                                     ),
                                   ),
-                              ],
+
+                                  StreamBuilder(
+                                    stream: FirebaseDatabase.instance
+                                        .ref("codebid_database")
+                                        .child("users")
+                                        .child(bidderId)
+                                        .onValue,
+                                    builder: (context, snapshot) {
+
+                                      if (!snapshot.hasData ||
+                                          snapshot.data!.snapshot.value == null) {
+                                        return const CircleAvatar(radius: 25);
+                                      }
+
+                                      final userData = Map<String, dynamic>.from(
+                                          snapshot.data!.snapshot.value as Map);
+
+                                      final image = userData["profileImage"] ?? "";
+
+                                      return CircleAvatar(
+                                        radius: 25,
+                                        backgroundImage: image.isNotEmpty
+                                            ? NetworkImage(image)
+                                            : const AssetImage(
+                                          "assets/icons/default-profile.png",
+                                        ) as ImageProvider,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
