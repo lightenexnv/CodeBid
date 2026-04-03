@@ -1,5 +1,7 @@
 import 'package:codebid/utils/snackbarPopup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -44,13 +46,13 @@ class AuthService {
 
   Future<void> logout() async {
     try {
-
       await GoogleSignIn().signOut();
-
       await FirebaseAuth.instance.signOut();
 
-      SnackbarUtils.show("Logged Out", "Successfully");
+      Get.deleteAll();
+      Get.offAllNamed("/login");
 
+      SnackbarUtils.show("Logged Out", "Successfully");
     } catch (e) {
       SnackbarUtils.show("Logout Failed", "Try again");
     }
