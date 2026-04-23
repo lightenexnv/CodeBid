@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:codebid/controllers/nav_controller.dart';
+import 'package:codebid/service/gemini_service.dart';
 import 'package:flutter/material.dart';
 
 import 'package:codebid/utils/snackbarPopup.dart';
@@ -28,6 +29,15 @@ class CreateTaskPageController extends GetxController {
 
   RxBool isLoading = false.obs;
 
+  // 🔥 AI Fields
+  RxString aiBudget = "".obs;
+  RxString aiTime = "".obs;
+  RxString aiSkills = "".obs;
+  RxString aiTitle = "".obs;
+  RxString aiDescription = "".obs;
+  RxBool isAiLoading = false.obs;
+  RxBool showSheet = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -41,6 +51,83 @@ class CreateTaskPageController extends GetxController {
       existingImages.value =
       List<String>.from(task!["images"] ?? []);
     }
+  }
+
+  // 🔥 GEMINI AI ANALYSIS
+  Future<void> analyzeWithAI() async {
+    final title = taskTitleController.text.trim();
+    final description = descTitleController.text.trim();
+
+    if (description.isEmpty) {
+      SnackbarUtils.show("Error", "Enter a description first");
+      return;
+    }
+
+    try {
+      isAiLoading.value = true;
+
+      final prompt = """
+You are an AI assistant for a freelancing platform. Return ONLY valid JSON with no extra text.
+
+Given the task details below, return a JSON with:
+- "title": A short, clear, professional task title (max 10 words)
+- "description": A clear, detailed, professional task description (2–4 sentences)
+- "skills": Comma-separated list of specific technical skills required (e.g. "Flutter, Firebase, REST API")
+- "budget": A single integer representing the fair price in INR (no range, no symbol, just the number)
+- "time": Estimated completion time (e.g. "3 days")
+
+Return format:
+{
+  "title": "...",
+  "description": "...",
+  "skills": "...",
+  "budget": 3500,
+  "time": "3 days"
+}
+
+Current title: $title
+Current description: $description
+""";
+
+      final response = await GeminiService.generate(prompt);
+
+      // Parse budget as int or string
+      final rawBudget = response["budget"];
+      final budgetStr = rawBudget is int
+          ? rawBudget.toString()
+          : rawBudget?.toString().replaceAll(RegExp(r'[^0-9]'), '') ?? "";
+
+      aiTitle.value = response["title"]?.toString() ?? title;
+      aiDescription.value = response["description"]?.toString() ?? description;
+      aiSkills.value = response["skills"]?.toString() ?? "Not available";
+      aiBudget.value = budgetStr;
+      aiTime.value = response["time"]?.toString() ?? "Not available";
+
+      // Signal page to open the sheet
+      showSheet.value = true;
+
+    } catch (e) {
+      debugPrint("AI ERROR: $e");
+      SnackbarUtils.show("AI Error", e.toString().replaceAll("Exception: ", ""));
+    } finally {
+      isAiLoading.value = false;
+    }
+  }
+
+  /// Apply AI suggestions to the form fields
+  void applyAiSuggestions() {
+    taskTitleController.text = aiTitle.value;
+    descTitleController.text = aiDescription.value;
+    budgetTitleController.text = aiBudget.value;
+  }
+
+  /// Dismiss AI suggestions without applying
+  void discardAiSuggestions() {
+    aiTitle.value = "";
+    aiDescription.value = "";
+    aiSkills.value = "";
+    aiBudget.value = "";
+    aiTime.value = "";
   }
 
   Future pickImages() async {
@@ -110,7 +197,7 @@ class CreateTaskPageController extends GetxController {
       return;
     }
 
-    final budget = int.tryParse(budgetText);
+    final budget = int.tryParse(budgetText.replaceAll(RegExp(r'[^0-9]'), ''));
     if (budget == null || budget <= 0) {
       SnackbarUtils.show("Error", "Budget must be a valid number");
       return;
@@ -161,6 +248,14 @@ class CreateTaskPageController extends GetxController {
         "lowestBid": budget,
         "timestamp": ServerValue.timestamp,
         "createdAt": DateTime.now().toString(),
+
+        // 🔥 STORE AI DATA
+        "aiSuggestion": {
+          "budget": aiBudget.value,
+          "time": aiTime.value,
+          "skills": aiSkills.value,
+        },
+
         "status": "pending",
         "isClosed": task?["isClosed"] ?? false,
       });

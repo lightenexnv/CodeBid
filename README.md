@@ -11,6 +11,7 @@ Built with **Flutter**, **GetX** for state management, and **Firebase** as a rob
 * 👥 **Role-Based Experience**: Dedicated dashboards and workflows for Requesters and Solvers.
 * ⚡ **Real-Time Bidding System**: Solvers can seamlessly browse tasks and place competitive bids.
 * 📊 **Task Management**: Requesters can post, monitor, and manage the bids received on their tasks.
+* 🤖 **AI-Powered Task Analysis**: Instantly generate a professional title, description, required skills, budget estimate, and timeline using Google Gemini — right from the Create Task screen.
 * 📱 **Responsive & Modern UI**: A sleek, cross-platform interface built entirely in Flutter.
 * 🗂️ **Reactive State Management**: Highly efficient UI updates handled smoothly via GetX.
 
@@ -43,7 +44,25 @@ As a Requester, your goal is to get your tasks solved efficiently. Here's how to
 **Steps to follow:**
 1. **Home Dashboard**: View an overview of your active and past tasks.
 2. **Create Task**: Easily post a new coding problem. Detail what you need, set a budget or timeframe, and publish it to the solver community.
-3. **Review & Approve Bids**: Once Solvers start bidding, review their proposals on your task and approve the best fit to kick-start the work.
+3. **Analyze with AI** *(optional)*: Tap the ✨ **Analyze with AI** button on the Create Task screen to let Google Gemini review your draft and instantly suggest:
+   - A polished, professional **task title**
+   - A clear, detailed **description**
+   - Relevant **technical skills** required
+   - A fair **budget estimate** (single value in ₹ INR)
+   - An **estimated completion time**
+
+   A bottom-sheet preview shows the AI suggestions side-by-side. You can **Apply** them to auto-fill the form or **Discard** them and keep your original input.
+
+   <div align="center">
+     <img src="assets/githubImages/Screenshot_20260423_145828.png" width="22%" />
+     <img src="assets/githubImages/Screenshot_20260423_145847.png" width="22%" />
+     <img src="assets/githubImages/Screenshot_20260423_145900.png" width="22%" />
+     <img src="assets/githubImages/Screenshot_20260423_145919.png" width="22%" />
+   </div>
+
+   *Images above (left to right): Create Task form, Analyze with AI loading, AI suggestions bottom-sheet, and form auto-filled with AI suggestions.*
+
+4. **Review & Approve Bids**: Once Solvers start bidding, review their proposals on your task and approve the best fit to kick-start the work.
 
 <div align="center">
   <img src="assets/githubImages/homescreenforrequester.jpg" width="22%" />
@@ -86,6 +105,8 @@ A Profile Page Displaying tasks uploade by the requester and tasks or bidding wo
 * **Frontend**: [Flutter](https://flutter.dev/)
 * **State Management**: [GetX](https://pub.dev/packages/get)
 * **Backend**: [Firebase](https://firebase.google.com/) (Auth, Cloud Firestore, Realtime Database, Cloud Storage)
+* **AI**: [Google Gemini API](https://ai.google.dev/) (`gemini-flash-latest`) — used for intelligent task analysis via `GeminiService`
+* **Image Hosting**: [Cloudinary](https://cloudinary.com/) — task image uploads
 
 ---
 
@@ -100,6 +121,7 @@ The CodeBid app follows a clean and modular folder structure utilizing the MVC/M
 
 ## 🚀 Future Improvements
 To take CodeBid to the next level, the following features are planned for upcoming iterations:
+- [x] 🤖 **AI-Powered Task Analysis**: Generate professional titles, descriptions, skill requirements, budgets, and timelines using Google Gemini *(shipped)*.
 - [ ] 🔔 **Push Notifications**: Notify Requesters when a new bid is placed, and alert Solvers when their bid is approved.
 - [ ] 💬 **In-App Messaging**: Real-time chat system to allow Requesters and Solvers to discuss project details directly.
 - [ ] 💳 **Payment Integration**: Incorporate an escrow payment system (Stripe / Razorpay) for secure milestone releases.
